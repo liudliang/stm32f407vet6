@@ -1,7 +1,12 @@
 #include "sys.h"
 #include "delay.h"
 #include "usart.h"
+
+
 #include "led.h"
+#include "dma.h"
+
+
 #include "includes.h"
 #include "os_app_hooks.h"
 //ALIENTEK 探索者STM32F407开发板 UCOSIII实验
@@ -54,45 +59,140 @@ void led2_task(void *p_arg);
 //任务优先级
 #define FLOAT_TASK_PRIO		6
 //任务堆栈大小
-#define FLOAT_STK_SIZE		128
+#define FLOAT_STK_SIZE		256
 //任务控制块
 OS_TCB	FloatTaskTCB;
 //任务堆栈
-__align(8) CPU_STK	FLOAT_TASK_STK[FLOAT_STK_SIZE];
+CPU_STK	FLOAT_TASK_STK[FLOAT_STK_SIZE];
 //任务函数
 void float_task(void *p_arg);
 
-int main(void)
+
+//任务优先级
+#define TaskStackUsage_TASK_PRIO		30
+//任务堆栈大小	
+#define TaskStackUsage_STK_SIZE 		128
+//任务控制块
+OS_TCB TaskStackUsageTaskTCB;
+//任务堆栈	
+CPU_STK TaskStackUsage_TASK_STK[TaskStackUsage_STK_SIZE];
+void TaskStackUsage_task(void *p_arg);
+
+
+
+//led0任务函数
+void led1_task(void *p_arg)
+{
+	OS_ERR err;
+	p_arg = p_arg;
+	while(1)
+	{
+		LED_On(LED1);
+		OSTimeDlyHMSM(0,0,0,200,OS_OPT_TIME_HMSM_STRICT,&err); //延时200ms
+		LED_Off(LED1);
+		OSTimeDlyHMSM(0,0,0,500,OS_OPT_TIME_HMSM_STRICT,&err); //延时500ms
+	}
+}
+
+//led1任务函数
+void led2_task(void *p_arg)
+{
+	OS_ERR err;
+	p_arg = p_arg;
+	while(1)
+	{
+		LED_Toggle(LED2);
+		OSTimeDlyHMSM(0,0,0,500,OS_OPT_TIME_HMSM_STRICT,&err); //延时500ms
+	}
+}
+
+
+//浮点测试任务
+void float_task(void *p_arg)
 {
 	OS_ERR err;
 	CPU_SR_ALLOC();
+	uint8_t i;
+	uint16_t adcx = 0;
+	static float float_num[3]={0};
+	float pro=0;//进度
+	uint8_t SEND_BUF_SIZE = 20;
+  uint16_t *SendBuff = DMA_GetAdcAver();
+		
+	while(1)
+	{
+//		float_num+=0.01f;
+//		OS_CRITICAL_ENTER();	//进入临界区
+
+
+//	  if(DMA_GetFlagStatus(DMA2_Stream0,DMA_FLAG_TCIF0)!=RESET)//等待DMA2_Steam0传输完成
+//		{ 
+//		  for(i = 0; i < SEND_BUF_SIZE;i++)
+//			{
+//				adcx += SendBuff[i];
+//			}
+//		    adcx = adcx/SEND_BUF_SIZE;
+//		    DMA_ClearFlag(DMA2_Stream0,DMA_FLAG_TCIF0);//清除DMA2_Steam7传输完成标志
+//		}
+//		pro=DMA_GetCurrDataCounter(DMA2_Stream0);//得到当前还剩余多少个数据
+//		pro=1-pro/30;//得到百分比	  
+//		pro*=100;      			    //扩大100倍
+		
+//		adcx=Get_Adc_Average(ADC_Channel_10,20);
+		for(i = 0; i < 3; i++)
+		{
+		  float_num[i]=(float)SendBuff[i]*(3.3/4096);
+		}			
+		printf("float_num[0]=%.4f,float_num[1]=%.4f,float_num[2]=%.4f\r\n",float_num[0],float_num[1],float_num[2]);
+//		OS_CRITICAL_EXIT();		//退出临界区
+			 
+
+		LED_Toggle(LED3);  //运行灯
+		OSTimeDlyHMSM(0,0,1,0,OS_OPT_TIME_HMSM_STRICT,&err); //延时1s
+
+	}
+}
+
+
+//TaskStackUsage任务函数
+void TaskStackUsage_task(void *p_arg)
+{
+	OS_ERR err;
+	p_arg = p_arg;
+	CPU_STK_SIZE free,used;
 	
+	printf("app start running!\n");	
+	while(1)
+	{
+		printf("CPU useage:%d\r\n", OSStatTaskCPUUsage);
+		
+		OSTaskStkChk(&TaskStackUsageTaskTCB,&free,&used,&err);
+		printf("TaskStackUsageTask used/free:%d/%d  usage:%%%d\r\n",used,free,(used*100)/(used+free));
+		
+		OSTaskStkChk(&Led1TaskTCB,&free,&used,&err);
+		printf("Led1TaskTCB used/free:%d/%d  usage:%%%d\r\n",used,free,(used*100)/(used+free));
+		
+		OSTaskStkChk(&Led2TaskTCB,&free,&used,&err);
+		printf("Led2TaskTCB used/free:%d/%d  usage:%%%d\r\n",used,free,(used*100)/(used+free));
+		
+		OSTaskStkChk(&FloatTaskTCB,&free,&used,&err);
+		printf("FloatTaskTCB used/free:%d/%d  usage:%%%d\r\n",used,free,(used*100)/(used+free));
+		
+		printf("\r\n\r\n\r\n");
+		
+		OSTimeDlyHMSM(0,0,3,0,OS_OPT_TIME_HMSM_STRICT,&err); //延时3s
+	}
+}
+
+void Hanrdware_Init(void)
+{
 	delay_init(168);  	//时钟初始化
 	NVIC_PriorityGroupConfig(NVIC_PriorityGroup_2);//中断分组配置
 	uart_init(115200);  //串口初始化
-	LED_Init();         //LED初始化
-
-	
-	OSInit(&err);		//初始化UCOSIII
-	OS_CRITICAL_ENTER();//进入临界区
-	//创建开始任务
-	OSTaskCreate((OS_TCB 	* )&StartTaskTCB,		//任务控制块
-				 (CPU_CHAR	* )"start task", 		//任务名字
-                 (OS_TASK_PTR )start_task, 			//任务函数
-                 (void		* )0,					//传递给任务函数的参数
-                 (OS_PRIO	  )START_TASK_PRIO,     //任务优先级
-                 (CPU_STK   * )&START_TASK_STK[0],	//任务堆栈基地址
-                 (CPU_STK_SIZE)START_STK_SIZE/10,	//任务堆栈深度限位
-                 (CPU_STK_SIZE)START_STK_SIZE,		//任务堆栈大小
-                 (OS_MSG_QTY  )0,					//任务内部消息队列能够接收的最大消息数目,为0时禁止接收消息
-                 (OS_TICK	  )0,					//当使能时间片轮转时的时间片长度，为0时为默认长度，
-                 (void   	* )0,					//用户补充的存储区
-                 (OS_OPT      )OS_OPT_TASK_STK_CHK|OS_OPT_TASK_STK_CLR, //任务选项
-                 (OS_ERR 	* )&err);				//存放该函数错误时的返回值
-	OS_CRITICAL_EXIT();	//退出临界区	 
-	OSStart(&err);  //开启UCOSIII
-	while(1);
+	LED_Init();         //LED初始化	
+	sys_ADC1_Config();
 }
+
 
 //开始任务函数
 void start_task(void *p_arg)
@@ -102,6 +202,7 @@ void start_task(void *p_arg)
 	p_arg = p_arg;
 
 	CPU_Init();
+	
 #if OS_CFG_STAT_TASK_EN > 0u
    OSStatTaskCPUUsageInit(&err);  	//统计任务                
 #endif
@@ -110,12 +211,33 @@ void start_task(void *p_arg)
     CPU_IntDisMeasMaxCurReset();	
 #endif
 
+#if OS_CFG_APP_HOOKS_EN				//使用钩子函数
+	App_OS_SetAllHooks();			
+#endif	
+	
 #if	OS_CFG_SCHED_ROUND_ROBIN_EN  //当使用时间片轮转的时候
 	 //使能时间片轮转调度功能,时间片长度为1个系统时钟节拍，既1*5=5ms
 	OSSchedRoundRobinCfg(DEF_ENABLED,1,&err);  
 #endif		
 	
+	
 	OS_CRITICAL_ENTER();	//进入临界区
+	
+	//创建检测各任务堆栈使用情况任务
+	OSTaskCreate((OS_TCB 	* )&TaskStackUsageTaskTCB,		
+				 (CPU_CHAR	* )"TaskStackUsage task", 		
+                 (OS_TASK_PTR )TaskStackUsage_task, 			
+                 (void		* )0,					
+                 (OS_PRIO	  )TaskStackUsage_TASK_PRIO,     
+                 (CPU_STK   * )&TaskStackUsage_TASK_STK[0],	
+                 (CPU_STK_SIZE)TaskStackUsage_STK_SIZE/10,	
+                 (CPU_STK_SIZE)TaskStackUsage_STK_SIZE,		
+                 (OS_MSG_QTY  )0,					
+                 (OS_TICK	  )0,					
+                 (void   	* )0,					
+                 (OS_OPT      )OS_OPT_TASK_STK_CHK|OS_OPT_TASK_STK_CLR,
+                 (OS_ERR 	* )&err);
+	
 	//创建LED1任务
 	OSTaskCreate((OS_TCB 	* )&Led1TaskTCB,		
 				 (CPU_CHAR	* )"led1 task", 		
@@ -160,48 +282,38 @@ void start_task(void *p_arg)
                  (void   	* )0,				
                  (OS_OPT      )OS_OPT_TASK_STK_CHK|OS_OPT_TASK_STK_CLR, 
                  (OS_ERR 	* )&err);				 
-	OS_TaskSuspend((OS_TCB*)&StartTaskTCB,&err);		//挂起开始任务			 
-	OS_CRITICAL_EXIT();	//进入临界区
+//	OS_TaskSuspend((OS_TCB*)&StartTaskTCB,&err);		//挂起开始任务							 
+	OS_CRITICAL_EXIT();	//退出临界区
+	OSTaskDel((OS_TCB*)0,&err);	//删除start_task任务自身							 
+			
+
 }
 
 
-//led0任务函数
-void led1_task(void *p_arg)
+int main(void)
 {
 	OS_ERR err;
-	p_arg = p_arg;
-	while(1)
-	{
-		LED_On(LED1);
-		OSTimeDlyHMSM(0,0,0,200,OS_OPT_TIME_HMSM_STRICT,&err); //延时200ms
-		LED_Off(LED1);
-		OSTimeDlyHMSM(0,0,0,500,OS_OPT_TIME_HMSM_STRICT,&err); //延时500ms
-	}
-}
-
-//led1任务函数
-void led2_task(void *p_arg)
-{
-	OS_ERR err;
-	p_arg = p_arg;
-	while(1)
-	{
-		LED_Toggle(LED2);
-		OSTimeDlyHMSM(0,0,0,500,OS_OPT_TIME_HMSM_STRICT,&err); //延时500ms
-	}
-}
-
-//浮点测试任务
-void float_task(void *p_arg)
-{
 	CPU_SR_ALLOC();
-	static float float_num=0.01;
-	while(1)
-	{
-		float_num+=0.01f;
-		OS_CRITICAL_ENTER();	//进入临界区
-		printf("float_num的值为: %.4f\r\n",float_num);
-		OS_CRITICAL_EXIT();		//退出临界区
-		delay_ms(500);			//延时500ms
-	}
+	
+	Hanrdware_Init();
+	
+	OSInit(&err);		//初始化UCOSIII
+	OS_CRITICAL_ENTER();//进入临界区
+	//创建开始任务
+	OSTaskCreate((OS_TCB 	* )&StartTaskTCB,		//任务控制块
+				 (CPU_CHAR	* )"start task", 		//任务名字
+                 (OS_TASK_PTR )start_task, 			//任务函数
+                 (void		* )0,					//传递给任务函数的参数
+                 (OS_PRIO	  )START_TASK_PRIO,     //任务优先级
+                 (CPU_STK   * )&START_TASK_STK[0],	//任务堆栈基地址
+                 (CPU_STK_SIZE)START_STK_SIZE/10,	//任务堆栈深度限位
+                 (CPU_STK_SIZE)START_STK_SIZE,		//任务堆栈大小
+                 (OS_MSG_QTY  )0,					//任务内部消息队列能够接收的最大消息数目,为0时禁止接收消息
+                 (OS_TICK	  )0,					//当使能时间片轮转时的时间片长度，为0时为默认长度，
+                 (void   	* )0,					//用户补充的存储区
+                 (OS_OPT      )OS_OPT_TASK_STK_CHK|OS_OPT_TASK_STK_CLR, //任务选项
+                 (OS_ERR 	* )&err);				//存放该函数错误时的返回值
+	OS_CRITICAL_EXIT();	//退出临界区	 
+	OSStart(&err);  //开启UCOSIII
+	while(1);
 }
