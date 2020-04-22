@@ -121,7 +121,7 @@ void DMA_Config(DMA_Stream_TypeDef *DMA_Streamx,u32 chx,u32 par,u32 mar,u16 ndtr
 	
 	  //中断优先级NVIC设置
   NVIC_InitStructure.NVIC_IRQChannel=DMA2_Stream0_IRQn; 
-	NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority=0x02;                     //抢占优先级
+	NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority=0x01;                     //抢占优先级
 	NVIC_InitStructure.NVIC_IRQChannelSubPriority=0x01;                            //响应优先级
 	NVIC_InitStructure.NVIC_IRQChannelCmd=ENABLE;
 	NVIC_Init(&NVIC_InitStructure);

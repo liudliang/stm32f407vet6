@@ -5,7 +5,7 @@
 
 #include "led.h"
 #include "dma.h"
-
+#include "iwdg.h"
 
 #include "includes.h"
 #include "os_app_hooks.h"
@@ -147,7 +147,7 @@ void float_task(void *p_arg)
 //		OS_CRITICAL_EXIT();		//退出临界区
 			 
 
-		LED_Toggle(LED3);  //运行灯
+//		LED_Toggle(LED3);  //运行灯
 		OSTimeDlyHMSM(0,0,1,0,OS_OPT_TIME_HMSM_STRICT,&err); //延时1s
 
 	}
@@ -191,6 +191,7 @@ void Hanrdware_Init(void)
 	uart_init(115200);  //串口初始化
 	LED_Init();         //LED初始化	
 	sys_ADC1_Config();
+	IWDG_Init(4,1500); //与分频数为 64,重载值为 1500,溢出时间为 3s
 }
 
 
@@ -281,10 +282,16 @@ void start_task(void *p_arg)
                  (OS_TICK	  )0,					
                  (void   	* )0,				
                  (OS_OPT      )OS_OPT_TASK_STK_CHK|OS_OPT_TASK_STK_CLR, 
-                 (OS_ERR 	* )&err);				 
-//	OS_TaskSuspend((OS_TCB*)&StartTaskTCB,&err);		//挂起开始任务							 
+                 (OS_ERR 	* )&err);				 						 
 	OS_CRITICAL_EXIT();	//退出临界区
-	OSTaskDel((OS_TCB*)0,&err);	//删除start_task任务自身							 
+	
+	while(1)
+	{
+		LED_Toggle(LED3);  //运行灯
+		IWDG_Feed();
+		OSTimeDlyHMSM(0,0,1,0,OS_OPT_TIME_HMSM_STRICT,&err); //延时1s
+	}
+//	OSTaskDel((OS_TCB*)0,&err);	//删除start_task任务自身							 
 			
 
 }
