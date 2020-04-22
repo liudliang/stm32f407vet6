@@ -599,10 +599,10 @@ static void SetSysClock(void)
 
 #if defined (STM32F40_41xxx) || defined (STM32F427_437xx) || defined (STM32F429_439xx)      
     /* PCLK2 = HCLK / 2*/
-    RCC->CFGR |= RCC_CFGR_PPRE2_DIV2;
+    RCC->CFGR |= RCC_CFGR_PPRE2_DIV2;  //2分频，PPRE2是APB高速预分频器（APB2，最大84MHz）
     
     /* PCLK1 = HCLK / 4*/
-    RCC->CFGR |= RCC_CFGR_PPRE1_DIV4;
+    RCC->CFGR |= RCC_CFGR_PPRE1_DIV4;  //4分频，PPRE1是APB低速预分频器（APB1，最大42MHz）
 #endif /* STM32F40_41xxx || STM32F427_437x || STM32F429_439xx */
 
 #if defined (STM32F401xx)
@@ -612,6 +612,26 @@ static void SetSysClock(void)
     /* PCLK1 = HCLK / 4*/
     RCC->CFGR |= RCC_CFGR_PPRE1_DIV2;
 #endif /* STM32F401xx */
+
+//配置主PLL的参数，系统时钟SYSCLK；锁相环压腔振荡器时钟PLL_VCO；
+//USB，SD卡，OTG FS时钟为使 USB OTG FS 能够正常工作，需要 48 MHz 的时钟。对于 SDIO 和随即数生成器，频率需要低于或等于 48 MHz 才可正常工作。
+//SYSCLK（最大168MHz）、PLL_VCO（192~432MHz）、HSE_VALUE / PLL_M（1~2MHz,建议2MHz）、PLL_M(2~63)、PLL_P(2、4、6、8)、PLL_N（192~432）
+//PLL_Q(2~15)
+
+
+//计算公式：
+//USB,SD卡时钟 = PLL_VCO / PLL_Q
+//SYSCLK = PLL_VCO / PLL_P
+//PLL_VCO = (HSE_VALUE / PLL_M) * PLL_N
+
+
+//此实验：外部晶振HSE_VALUE=25MHz，PLL_M=25，PLL_N=336，PLL_P=2；PLL_Q=7;
+//则系统时钟为168MHz，HCLK不分频为168MHz；PLCK2=84MHz；PCLK1=42MHz；USB，SD卡，OTG FS时钟频率为48MHz
+
+
+//例如2：外部晶振HSE_VALUE=8MHz，PLL_M=8，PLL_N=336，PLL_P=2；
+//则系统时钟为168MHz，HCLK不分频为168MHz；PLCK2=84MHz；PCLK1=42MHz；USB，SD卡，OTG FS时钟频率为48MHz
+
    
     /* Configure the main PLL */
     RCC->PLLCFGR = PLL_M | (PLL_N << 6) | (((PLL_P >> 1) -1) << 16) |
