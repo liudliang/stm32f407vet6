@@ -16,7 +16,7 @@
         <TargetCommonOption>
           <Device>STM32F407VETx</Device>
           <Vendor>STMicroelectronics</Vendor>
-          <PackID>Keil.STM32F4xx_DFP.2.3.0</PackID>
+          <PackID>Keil.STM32F4xx_DFP.2.13.0</PackID>
           <PackURL>http://www.keil.com/pack</PackURL>
           <Cpu>IRAM(0x20000000,0x00020000) IRAM2(0x10000000,0x00010000) IROM(0x08000000,0x00080000) CPUTYPE("Cortex-M4") FPU2 CLOCK(12000000) ELITTLE</Cpu>
           <FlashUtilSpec></FlashUtilSpec>
@@ -184,7 +184,6 @@
             <hadXRAM>0</hadXRAM>
             <uocXRam>0</uocXRam>
             <RvdsVP>2</RvdsVP>
-            <RvdsMve>0</RvdsMve>
             <hadIRAM2>1</hadIRAM2>
             <hadIROM2>0</hadIROM2>
             <StupSel>8</StupSel>
@@ -338,7 +337,7 @@
               <MiscControls></MiscControls>
               <Define>STM32F40_41xxx,USE_STDPERIPH_DRIVER,__FPU_USED=1</Define>
               <Undefine></Undefine>
-              <IncludePath>..\CORE;..\FWLIB\inc;..\SYSTEM\delay;..\SYSTEM\sys;..\SYSTEM\usart;..\UCOSIII\uC-LIB;..\UCOSIII\uC-CPU;..\UCOSIII\uCOS-III;..\UCOSIII\UCOS_BSP;..\UCOSIII\UCOS_CONFIG;..\UCOSIII\uCOS-III\Source;..\UCOSIII\uC-CPU\ARM-Cortex-M4\RealView;..\UCOSIII\uC-LIB\Ports\ARM-Cortex-M4\RealView;..\UCOSIII\uCOS-III\Ports\ARM-Cortex-M4\Generic\RealView;..\HARDWARE\LED;..\APP</IncludePath>
+              <IncludePath>..\CORE;..\FWLIB\inc;..\SYSTEM\delay;..\SYSTEM\sys;..\SYSTEM\usart;..\UCOSIII\uC-LIB;..\UCOSIII\uC-CPU;..\UCOSIII\uCOS-III;..\UCOSIII\UCOS_BSP;..\UCOSIII\UCOS_CONFIG;..\UCOSIII\uCOS-III\Source;..\UCOSIII\uC-CPU\ARM-Cortex-M4\RealView;..\UCOSIII\uC-LIB\Ports\ARM-Cortex-M4\RealView;..\UCOSIII\uCOS-III\Ports\ARM-Cortex-M4\Generic\RealView;..\APP;..\HARDWARE\DMA;..\HARDWARE\IWDG;..\HARDWARE\TIMER;..\HARDWARE\GPIO;..\APP\common</IncludePath>
             </VariousControls>
           </Cads>
           <Aads>
@@ -813,9 +812,24 @@
           <GroupName>HARDWARE</GroupName>
           <Files>
             <File>
-              <FileName>led.c</FileName>
+              <FileName>dma.c</FileName>
               <FileType>1</FileType>
-              <FilePath>..\HARDWARE\LED\led.c</FilePath>
+              <FilePath>..\HARDWARE\DMA\dma.c</FilePath>
+            </File>
+            <File>
+              <FileName>iwdg.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\HARDWARE\IWDG\iwdg.c</FilePath>
+            </File>
+            <File>
+              <FileName>timer.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\HARDWARE\TIMER\timer.c</FilePath>
+            </File>
+            <File>
+              <FileName>gpio.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\HARDWARE\GPIO\gpio.c</FilePath>
             </File>
           </Files>
         </Group>
@@ -836,6 +850,46 @@
               <FileName>system_stm32f4xx.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\APP\system_stm32f4xx.c</FilePath>
+            </File>
+            <File>
+              <FileName>MainCtrlUint.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\APP\MainCtrlUint.c</FilePath>
+            </File>
+            <File>
+              <FileName>Task_CardReader.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\APP\Task_CardReader.c</FilePath>
+            </File>
+            <File>
+              <FileName>Task_RealTimeCheck.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\APP\Task_RealTimeCheck.c</FilePath>
+            </File>
+          </Files>
+        </Group>
+        <Group>
+          <GroupName>COMMON</GroupName>
+          <Files>
+            <File>
+              <FileName>ASE.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\APP\common\ASE.c</FilePath>
+            </File>
+            <File>
+              <FileName>common.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\APP\common\common.c</FilePath>
+            </File>
+            <File>
+              <FileName>crc.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\APP\common\crc.c</FilePath>
+            </File>
+            <File>
+              <FileName>MD5.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\APP\common\MD5.c</FilePath>
             </File>
           </Files>
         </Group>

@@ -107,11 +107,13 @@ void SysTick_Handler(void)
 	}
 }
 #endif
-			   
-//初始化延迟函数
-//当使用OS的时候,此函数会初始化OS的时钟节拍
-//SYSTICK的时钟固定为AHB时钟的1/8
-//SYSCLK:系统时钟频率
+
+/*
+初始化延迟函数
+当使用OS的时候,此函数会初始化OS的时钟节拍
+SYSTICK的时钟固定为AHB时钟的1/8
+SYSCLK:系统时钟频率
+*/
 void delay_init(u8 SYSCLK)
 {
 #if SYSTEM_SUPPORT_OS 						//如果需要支持OS.

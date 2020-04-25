@@ -3,12 +3,17 @@
 #include "usart.h"
 
 
-#include "led.h"
+#include "gpio.h"
 #include "dma.h"
 #include "iwdg.h"
+#include "timer.h"
 
 #include "includes.h"
 #include "os_app_hooks.h"
+
+
+#include "MainData.h"
+
 //ALIENTEK 探索者STM32F407开发板 UCOSIII实验
 //例4-1 UCOSIII UCOSIII移植
 
@@ -69,6 +74,18 @@ void float_task(void *p_arg);
 
 
 //任务优先级
+#define RealTimeCheck_TASK_PRIO		7
+//任务堆栈大小
+#define RealTimeCheck_STK_SIZE		128
+//任务控制块
+OS_TCB	RealTimeCheckTaskTCB;
+//任务堆栈
+CPU_STK	RealTimeCheck_TASK_STK[RealTimeCheck_STK_SIZE];
+//任务函数
+void RealTimeCheck_task(void *p_arg);
+
+
+//任务优先级
 #define TaskStackUsage_TASK_PRIO		30
 //任务堆栈大小	
 #define TaskStackUsage_STK_SIZE 		128
@@ -85,12 +102,24 @@ void led1_task(void *p_arg)
 {
 	OS_ERR err;
 	p_arg = p_arg;
+	
+	CHARGE_TYPE *PtrRunData = ChgData_GetRunDataPtr();
+	uint8_t k1status = PtrRunData->input->statu.bits.key2;
 	while(1)
 	{
-		LED_On(LED1);
-		OSTimeDlyHMSM(0,0,0,200,OS_OPT_TIME_HMSM_STRICT,&err); //延时200ms
-		LED_Off(LED1);
-		OSTimeDlyHMSM(0,0,0,500,OS_OPT_TIME_HMSM_STRICT,&err); //延时500ms
+//		LED_On(LED2);
+//		OSTimeDlyHMSM(0,0,0,200,OS_OPT_TIME_HMSM_STRICT,&err); //延时200ms
+//		LED_Off(LED2);
+		if(k1status != PtrRunData->input->statu.bits.key2)
+		{
+			k1status = PtrRunData->input->statu.bits.key2;
+			if(1 == k1status)
+			{
+				LED_Toggle(LED2);
+			}
+		}
+		
+		OSTimeDlyHMSM(0,0,0,20,OS_OPT_TIME_HMSM_STRICT,&err); //延时500ms
 	}
 }
 
@@ -101,7 +130,7 @@ void led2_task(void *p_arg)
 	p_arg = p_arg;
 	while(1)
 	{
-		LED_Toggle(LED2);
+		LED_Toggle(LED3);
 		OSTimeDlyHMSM(0,0,0,500,OS_OPT_TIME_HMSM_STRICT,&err); //延时500ms
 	}
 }
@@ -160,7 +189,6 @@ void TaskStackUsage_task(void *p_arg)
 	OS_ERR err;
 	p_arg = p_arg;
 	CPU_STK_SIZE free,used;
-	
 	printf("app start running!\n");	
 	while(1)
 	{
@@ -178,20 +206,61 @@ void TaskStackUsage_task(void *p_arg)
 		OSTaskStkChk(&FloatTaskTCB,&free,&used,&err);
 		printf("FloatTaskTCB used/free:%d/%d  usage:%%%d\r\n",used,free,(used*100)/(used+free));
 		
+		OSTaskStkChk(&RealTimeCheckTaskTCB,&free,&used,&err);
+		printf("RealTimeCheckTaskTCB used/free:%d/%d  usage:%%%d\r\n",used,free,(used*100)/(used+free));
+		
 		printf("\r\n\r\n\r\n");
 		
 		OSTimeDlyHMSM(0,0,3,0,OS_OPT_TIME_HMSM_STRICT,&err); //延时3s
 	}
 }
 
+
+// ========================================================================================================
+// void sysSTM32F40xAssertClocks(void)
+// 描述: 	系统时钟检查
+// 返回值: 无
+// ========================================================================================================
+static void sysSTM32F40xAssertClocks(void)
+{
+	RCC_ClocksTypeDef RCC_Clocks = { 0 };
+	
+	RCC_GetClocksFreq(&RCC_Clocks);
+	
+	if (RCC_Clocks.SYSCLK_Frequency != SystemCoreClock)
+	{
+		while (1);
+	}
+}
+
+// ========================================================================================================
+// void RCC_Configuration(void)
+// 描述: 	使能高速时钟
+// 返回值: 无
+// ========================================================================================================
+static void RCC_Configuration(void)
+{																	
+	RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOA, ENABLE); 
+	RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOB, ENABLE);
+	RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOC, ENABLE);
+	RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOD, ENABLE); 
+	RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOE, ENABLE);
+	
+	sysSTM32F40xAssertClocks();
+}
+
 void Hanrdware_Init(void)
 {
+
 	delay_init(168);  	//时钟初始化
+	RCC_Configuration();
 	NVIC_PriorityGroupConfig(NVIC_PriorityGroup_2);//中断分组配置
 	uart_init(115200);  //串口初始化
-	LED_Init();         //LED初始化	
+	
+	InPut_OutPut_Init();
 	sys_ADC1_Config();
 	IWDG_Init(4,1500); //与分频数为 64,重载值为 1500,溢出时间为 3s
+	TimerInit();        //定时器初始化
 }
 
 
@@ -220,7 +289,8 @@ void start_task(void *p_arg)
 	 //使能时间片轮转调度功能,时间片长度为1个系统时钟节拍，既1*5=5ms
 	OSSchedRoundRobinCfg(DEF_ENABLED,1,&err);  
 #endif		
-	
+
+  MainCtrlUnit_Init();
 	
 	OS_CRITICAL_ENTER();	//进入临界区
 	
@@ -282,12 +352,27 @@ void start_task(void *p_arg)
                  (OS_TICK	  )0,					
                  (void   	* )0,				
                  (OS_OPT      )OS_OPT_TASK_STK_CHK|OS_OPT_TASK_STK_CLR, 
-                 (OS_ERR 	* )&err);				 						 
+                 (OS_ERR 	* )&err);				
+	//创建实时检测任务
+	OSTaskCreate((OS_TCB 	* )&RealTimeCheckTaskTCB,		
+				 (CPU_CHAR	* )"RealTimeCheck test task", 		
+                 (OS_TASK_PTR )RealTimeCheck_task, 			
+                 (void		* )0,					
+                 (OS_PRIO	  )RealTimeCheck_TASK_PRIO,     	
+                 (CPU_STK   * )&RealTimeCheck_TASK_STK[0],	
+                 (CPU_STK_SIZE)RealTimeCheck_STK_SIZE/10,	
+                 (CPU_STK_SIZE)RealTimeCheck_STK_SIZE,		
+                 (OS_MSG_QTY  )0,					
+                 (OS_TICK	  )0,					
+                 (void   	* )0,				
+                 (OS_OPT      )OS_OPT_TASK_STK_CHK|OS_OPT_TASK_STK_CLR, 
+                 (OS_ERR 	* )&err);											 
 	OS_CRITICAL_EXIT();	//退出临界区
 	
+								 
 	while(1)
 	{
-		LED_Toggle(LED3);  //运行灯
+		LED_Toggle(LED1);  //运行灯
 		IWDG_Feed();
 		OSTimeDlyHMSM(0,0,1,0,OS_OPT_TIME_HMSM_STRICT,&err); //延时1s
 	}

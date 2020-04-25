@@ -595,7 +595,7 @@ static void SetSysClock(void)
     PWR->CR |= PWR_CR_VOS;
 
     /* HCLK = SYSCLK / 1*/
-    RCC->CFGR |= RCC_CFGR_HPRE_DIV1;
+    RCC->CFGR |= RCC_CFGR_HPRE_DIV1;   //1分频，HPRE是AHB高速预分频器（APB2，最大168MHz）
 
 #if defined (STM32F40_41xxx) || defined (STM32F427_437xx) || defined (STM32F429_439xx)      
     /* PCLK2 = HCLK / 2*/
