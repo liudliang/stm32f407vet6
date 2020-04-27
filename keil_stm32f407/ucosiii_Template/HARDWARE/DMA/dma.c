@@ -9,7 +9,7 @@
  
 //将采集到的adc值放入数组中保存
  
-#define   DMA_PER      3        //外设数量
+#define   DMA_PER      4        //采集点数量
 #define   DMA_NUM      10        //采集次数
 
 static u16 DMA_Adc1Aver[DMA_PER];    //DMA_AdcAver[0]:pc0   DMA_AdcAver[1]:pc1  DMA_AdcAver[2]:pc2 
@@ -26,13 +26,20 @@ void DMA_GPIO_config()
 	GPIO_InitTypeDef  GPIO_InitStructure;
 	
 	RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOC, ENABLE);                          //使能GPIOC时钟
-	
 	//先初始化ADC1通道IO口
   GPIO_InitStructure.GPIO_Pin = GPIO_Pin_0 | GPIO_Pin_1 | GPIO_Pin_2 ;
-	
   GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AN;                                   //模拟输入
 	GPIO_InitStructure.GPIO_PuPd = GPIO_PuPd_NOPULL ;
   GPIO_Init(GPIOC, &GPIO_InitStructure);    
+	
+	
+	RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOA, ENABLE);                          //使能GPIOA时钟
+	//先初始化ADC1通道IO口
+  GPIO_InitStructure.GPIO_Pin = GPIO_Pin_5 ;
+  GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AN;                                   //模拟输入
+	GPIO_InitStructure.GPIO_PuPd = GPIO_PuPd_NOPULL ;
+  GPIO_Init(GPIOA, &GPIO_InitStructure);
+	
 }
 
 //adc初始化配置
@@ -46,7 +53,13 @@ void DMA_ADC_config()
  
 	RCC_APB2PeriphResetCmd(RCC_APB2Periph_ADC1,ENABLE);	                           //ADC1复位
 	RCC_APB2PeriphResetCmd(RCC_APB2Periph_ADC1,DISABLE);                           //复位结束
- 
+
+/*
+ADCCLK = PCLK2/ADC_Prescaler = 84/4 = 21Mhz
+ADC采样频率： Sampling Time + Conversion Time = 480 + 12 cycles = 492cyc
+                    Conversion Time = 21MHz / 492cyc = 42.6ksps. 
+*/
+	ADC_TempSensorVrefintCmd(ENABLE);//使能内部温度传感器
 	ADC_CommonInitStructure.ADC_Mode = ADC_Mode_Independent;                       //独立模式
   ADC_CommonInitStructure.ADC_TwoSamplingDelay = ADC_TwoSamplingDelay_5Cycles;  //两个采样阶段之间的延迟x个时钟
   ADC_CommonInitStructure.ADC_DMAAccessMode = ADC_DMAAccessMode_1;               //DMA使能（DMA传输下要设置使能）
@@ -58,13 +71,14 @@ void DMA_ADC_config()
   ADC_InitStructure.ADC_ContinuousConvMode = ENABLE;                             //开启连续转换（开启DMA传输要设置连续转换）
   ADC_InitStructure.ADC_ExternalTrigConvEdge = ADC_ExternalTrigConvEdge_None;    //禁止触发检测，使用软件触发
   ADC_InitStructure.ADC_DataAlign = ADC_DataAlign_Right;                         //右对齐	
-  ADC_InitStructure.ADC_NbrOfConversion = 3;                                    //有几个通道传输就写几 （DMA传输下要设置为通道数）
+  ADC_InitStructure.ADC_NbrOfConversion = DMA_PER;                                    //有几个通道传输就写几 （DMA传输下要设置为通道数）
   ADC_Init(ADC1, &ADC_InitStructure);                                            //ADC初始化
 	
 	
 	ADC_RegularChannelConfig(ADC1, ADC_Channel_10, 1,  ADC_SampleTime_480Cycles);  //res[0]-PC0
 	ADC_RegularChannelConfig(ADC1, ADC_Channel_11, 2,  ADC_SampleTime_480Cycles);  //res[1]-PC1
 	ADC_RegularChannelConfig(ADC1, ADC_Channel_12, 3,  ADC_SampleTime_480Cycles); //res[2]-PC2
+	ADC_RegularChannelConfig(ADC1, ADC_Channel_16, 4,  ADC_SampleTime_480Cycles); //res[3]-PA5（内部温度采集通道）
  
 	ADC_DMARequestAfterLastTransferCmd(ADC1, ENABLE);
 	ADC_DMACmd(ADC1, ENABLE);
@@ -187,7 +201,19 @@ void DMA2_Stream0_IRQHandler(void)
 }
 
 
-
+//得到温度值
+//返回值:温度值(扩大了100倍,单位:℃.)
+double DMA_GetTemprate(void)
+{
+	u32 adcx;
+	short result;
+ 	double temperate;
+	adcx=DMA_Adc1Aver[3];
+	temperate=(float)adcx*(3.3/4096);		//电压值
+	temperate=(temperate-0.76)/0.0025 + 25; //转换为温度值 
+	return temperate;
+}
+	 
 
 
 

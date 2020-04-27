@@ -172,7 +172,7 @@ void float_task(void *p_arg)
 		{
 		  float_num[i]=(float)SendBuff[i]*(3.3/4096);
 		}			
-		printf("float_num[0]=%.4f,float_num[1]=%.4f,float_num[2]=%.4f\r\n",float_num[0],float_num[1],float_num[2]);
+		printf("float_num[0]=%.4f,float_num[1]=%.4f,float_num[2]=%.4f,temperature=%f\r\n",float_num[0],float_num[1],float_num[2],DMA_GetTemprate());
 //		OS_CRITICAL_EXIT();		//ÍË³öÁÙ½çÇø
 			 
 
