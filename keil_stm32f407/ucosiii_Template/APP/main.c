@@ -50,16 +50,26 @@ OS_TCB Led1TaskTCB;
 CPU_STK LED1_TASK_STK[LED1_STK_SIZE];
 void led1_task(void *p_arg);
 
+////任务优先级
+//#define LED2_TASK_PRIO		5
+////任务堆栈大小	
+//#define LED2_STK_SIZE 		128
+////任务控制块
+//OS_TCB Led2TaskTCB;
+////任务堆栈	
+//CPU_STK LED2_TASK_STK[LED2_STK_SIZE];
+////任务函数
+//void led2_task(void *p_arg);
 //任务优先级
-#define LED2_TASK_PRIO		5
+#define CARDREADER_TASK_PRIO		5
 //任务堆栈大小	
-#define LED2_STK_SIZE 		128
+#define CARDREADER_STK_SIZE 		128
 //任务控制块
-OS_TCB Led2TaskTCB;
+OS_TCB CardReaderTaskTCB;
 //任务堆栈	
-CPU_STK LED2_TASK_STK[LED2_STK_SIZE];
+CPU_STK CARDREADER_TASK_STK[CARDREADER_STK_SIZE];
 //任务函数
-void led2_task(void *p_arg);
+void CardReader_task(void *p_arg);
 
 //任务优先级
 #define FLOAT_TASK_PRIO		6
@@ -104,16 +114,13 @@ void led1_task(void *p_arg)
 	p_arg = p_arg;
 	
 	CHARGE_TYPE *PtrRunData = ChgData_GetRunDataPtr();
-	uint8_t k1status = PtrRunData->input->statu.bits.key2;
+	uint8_t k2status = PtrRunData->input->statu.bits.key2;
 	while(1)
 	{
-//		LED_On(LED2);
-//		OSTimeDlyHMSM(0,0,0,200,OS_OPT_TIME_HMSM_STRICT,&err); //延时200ms
-//		LED_Off(LED2);
-		if(k1status != PtrRunData->input->statu.bits.key2)
+		if(k2status != PtrRunData->input->statu.bits.key2)
 		{
-			k1status = PtrRunData->input->statu.bits.key2;
-			if(1 == k1status)
+			k2status = PtrRunData->input->statu.bits.key2;
+			if(1 == k2status)
 			{
 				LED_Toggle(LED2);
 			}
@@ -123,17 +130,17 @@ void led1_task(void *p_arg)
 	}
 }
 
-//led1任务函数
-void led2_task(void *p_arg)
-{
-	OS_ERR err;
-	p_arg = p_arg;
-	while(1)
-	{
-		LED_Toggle(LED3);
-		OSTimeDlyHMSM(0,0,0,500,OS_OPT_TIME_HMSM_STRICT,&err); //延时500ms
-	}
-}
+////led1任务函数
+//void led2_task(void *p_arg)
+//{
+//	OS_ERR err;
+//	p_arg = p_arg;
+//	while(1)
+//	{
+//		LED_Toggle(LED3);
+//		OSTimeDlyHMSM(0,0,0,500,OS_OPT_TIME_HMSM_STRICT,&err); //延时500ms
+//	}
+//}
 
 
 //浮点测试任务
@@ -200,7 +207,7 @@ void TaskStackUsage_task(void *p_arg)
 		OSTaskStkChk(&Led1TaskTCB,&free,&used,&err);
 		printf("Led1TaskTCB used/free:%d/%d  usage:%%%d\r\n",used,free,(used*100)/(used+free));
 		
-		OSTaskStkChk(&Led2TaskTCB,&free,&used,&err);
+		OSTaskStkChk(&CardReaderTaskTCB,&free,&used,&err);
 		printf("Led2TaskTCB used/free:%d/%d  usage:%%%d\r\n",used,free,(used*100)/(used+free));
 		
 		OSTaskStkChk(&FloatTaskTCB,&free,&used,&err);
@@ -255,7 +262,8 @@ void Hanrdware_Init(void)
 	delay_init(168);  	//时钟初始化
 	RCC_Configuration();
 	NVIC_PriorityGroupConfig(NVIC_PriorityGroup_2);//中断分组配置
-	uart_init(115200);  //串口初始化
+//	uart_init(115200);  //串口初始化
+	sys_SerialHwInit();
 	
 	InPut_OutPut_Init();
 	sys_ADC1_Config();
@@ -324,15 +332,15 @@ void start_task(void *p_arg)
                  (OS_OPT      )OS_OPT_TASK_STK_CHK|OS_OPT_TASK_STK_CLR,
                  (OS_ERR 	* )&err);				
 				 
-	//创建LED1任务
-	OSTaskCreate((OS_TCB 	* )&Led2TaskTCB,		
-				 (CPU_CHAR	* )"led2 task", 		
-                 (OS_TASK_PTR )led2_task, 			
+	//创建CARDREADER任务
+	OSTaskCreate((OS_TCB 	* )&CardReaderTaskTCB,		
+				 (CPU_CHAR	* )"CardReader task", 		
+                 (OS_TASK_PTR )CardReader_task, 			
                  (void		* )0,					
-                 (OS_PRIO	  )LED2_TASK_PRIO,     	
-                 (CPU_STK   * )&LED2_TASK_STK[0],	
-                 (CPU_STK_SIZE)LED2_STK_SIZE/10,	
-                 (CPU_STK_SIZE)LED2_STK_SIZE,		
+                 (OS_PRIO	  )CARDREADER_TASK_PRIO,     	
+                 (CPU_STK   * )&CARDREADER_TASK_STK[0],	
+                 (CPU_STK_SIZE)CARDREADER_STK_SIZE/10,	
+                 (CPU_STK_SIZE)CARDREADER_STK_SIZE,		
                  (OS_MSG_QTY  )0,					
                  (OS_TICK	  )0,					
                  (void   	* )0,				

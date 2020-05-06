@@ -13,6 +13,7 @@
 //定时器溢出时间计算方法:Tout=((arr+1)*(psc+1))/Ft us.
 //Ft=定时器工作频率,单位:Mhz
 
+extern void Check_ReadAllInputIo(void);
 
 void tim2_1s_init(void)
 {
@@ -145,11 +146,13 @@ void tim5_100ms_NVIC_init()
 	NVIC_Init(&NVIC_InitStruct);
 }
 
+
 void TIM5_IRQHandler(void)
 { 	
 	if(TIM_GetITStatus(TIM5,TIM_IT_Update)==SET) //溢出中断
 	{
 //		LED1=!LED1;//DS1翻转
+		Check_ReadAllInputIo();
 	}
 	TIM_ClearITPendingBit(TIM5,TIM_IT_Update);  //清除中断标志位	
 }
