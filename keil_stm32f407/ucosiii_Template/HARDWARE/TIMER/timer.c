@@ -152,7 +152,7 @@ void TIM5_IRQHandler(void)
 	if(TIM_GetITStatus(TIM5,TIM_IT_Update)==SET) //溢出中断
 	{
 //		LED1=!LED1;//DS1翻转
-		Check_ReadAllInputIo();
+		
 	}
 	TIM_ClearITPendingBit(TIM5,TIM_IT_Update);  //清除中断标志位	
 }
@@ -190,6 +190,7 @@ void TIM6_DAC_IRQHandler(void)
 	if(TIM_GetITStatus(TIM6,TIM_IT_Update)==SET) //溢出中断
 	{
 //		LED1=!LED1;//DS1翻转
+		Check_ReadAllInputIo();
 	}
 	TIM_ClearITPendingBit(TIM6,TIM_IT_Update);  //清除中断标志位	
 }

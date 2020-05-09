@@ -1,18 +1,20 @@
 #include "sys.h"
 #include "delay.h"
 #include "usart.h"
-
+#include "common.h"
 
 #include "gpio.h"
 #include "dma.h"
 #include "iwdg.h"
 #include "timer.h"
+#include "24cxx.h"
 
 #include "includes.h"
 #include "os_app_hooks.h"
 
 
 #include "MainData.h"
+#include "Debug.h"
 
 //ALIENTEK 探索者STM32F407开发板 UCOSIII实验
 //例4-1 UCOSIII UCOSIII移植
@@ -179,7 +181,8 @@ void float_task(void *p_arg)
 		{
 		  float_num[i]=(float)SendBuff[i]*(3.3/4096);
 		}			
-		printf("float_num[0]=%.4f,float_num[1]=%.4f,float_num[2]=%.4f,temperature=%f\r\n",float_num[0],float_num[1],float_num[2],DMA_GetTemprate());
+		sprintf(DEBUG_Buff,"float_num[0]=%.4f,float_num[1]=%.4f,float_num[2]=%.4f,temperature=%f\r\n",float_num[0],float_num[1],float_num[2],DMA_GetTemprate());
+    DEBUG_Printf(DEBUG_Buff);
 //		OS_CRITICAL_EXIT();		//退出临界区
 			 
 
@@ -196,27 +199,34 @@ void TaskStackUsage_task(void *p_arg)
 	OS_ERR err;
 	p_arg = p_arg;
 	CPU_STK_SIZE free,used;
-	printf("app start running!\n");	
+
+	DEBUG_Printf("app start running!\r\n");
 	while(1)
 	{
-		printf("CPU useage:%d\r\n", OSStatTaskCPUUsage);
+		sprintf(DEBUG_Buff,"CPU useage:%d\r\n", OSStatTaskCPUUsage);
+		DEBUG_Printf(DEBUG_Buff);
 		
 		OSTaskStkChk(&TaskStackUsageTaskTCB,&free,&used,&err);
-		printf("TaskStackUsageTask used/free:%d/%d  usage:%%%d\r\n",used,free,(used*100)/(used+free));
+		sprintf(DEBUG_Buff,"TaskStackUsageTask used/free:%d/%d  usage:%%%d\r\n",used,free,(used*100)/(used+free));
+		DEBUG_Printf(DEBUG_Buff);
 		
 		OSTaskStkChk(&Led1TaskTCB,&free,&used,&err);
-		printf("Led1TaskTCB used/free:%d/%d  usage:%%%d\r\n",used,free,(used*100)/(used+free));
+		sprintf(DEBUG_Buff,"Led1TaskTCB used/free:%d/%d  usage:%%%d\r\n",used,free,(used*100)/(used+free));
+		DEBUG_Printf(DEBUG_Buff);
 		
 		OSTaskStkChk(&CardReaderTaskTCB,&free,&used,&err);
-		printf("Led2TaskTCB used/free:%d/%d  usage:%%%d\r\n",used,free,(used*100)/(used+free));
+		sprintf(DEBUG_Buff,"Led2TaskTCB used/free:%d/%d  usage:%%%d\r\n",used,free,(used*100)/(used+free));
+		DEBUG_Printf(DEBUG_Buff);
 		
 		OSTaskStkChk(&FloatTaskTCB,&free,&used,&err);
-		printf("FloatTaskTCB used/free:%d/%d  usage:%%%d\r\n",used,free,(used*100)/(used+free));
+		sprintf(DEBUG_Buff,"FloatTaskTCB used/free:%d/%d  usage:%%%d\r\n",used,free,(used*100)/(used+free));
+		DEBUG_Printf(DEBUG_Buff);
 		
 		OSTaskStkChk(&RealTimeCheckTaskTCB,&free,&used,&err);
-		printf("RealTimeCheckTaskTCB used/free:%d/%d  usage:%%%d\r\n",used,free,(used*100)/(used+free));
+		sprintf(DEBUG_Buff,"RealTimeCheckTaskTCB used/free:%d/%d  usage:%%%d\r\n",used,free,(used*100)/(used+free));
+		DEBUG_Printf(DEBUG_Buff);
 		
-		printf("\r\n\r\n\r\n");
+		DEBUG_Printf("\r\n\r\n\r\n");
 		
 		OSTimeDlyHMSM(0,0,3,0,OS_OPT_TIME_HMSM_STRICT,&err); //延时3s
 	}
@@ -269,8 +279,37 @@ void Hanrdware_Init(void)
 	sys_ADC1_Config();
 	IWDG_Init(4,1500); //与分频数为 64,重载值为 1500,溢出时间为 3s
 	TimerInit();        //定时器初始化
+	AT24CXX_Init();     
+	
+	DEBUG_Init();
 }
 
+void HardWare_Check(void)
+{
+	uint8_t tmpdata[4] = {0};
+	uint32_t reboottimes = 0;
+	if(AT24CXX_Check())//检测不到24c02
+	{
+		DEBUG_Printf("24C02 Check Failed!\r\n");	
+		delay_ms(300);
+		LED_Toggle(LED1);  //运行灯
+	}
+	else
+	{
+		sprintf(DEBUG_Buff,"24C02 Check Successfull!\r\n");
+		DEBUG_Printf(DEBUG_Buff);
+//		AT24CXX_Read(AT24Cxx_RebootTimes_ADDR,(uint8_t *)&reboottimes,4);
+		reboottimes = AT24CXX_ReadLenByte(AT24Cxx_RebootTimes_ADDR,4);
+		reboottimes = Common_Bcd2hex32(reboottimes) + 1;
+		sprintf(DEBUG_Buff,"reboot times：%d!\r\n",reboottimes);
+		DEBUG_Printf(DEBUG_Buff);
+		reboottimes = Common_Hex2bcd32(reboottimes);
+//		AT24CXX_Write(0,(uint8_t*)reboottimes,4);    //以BCD码格式存储
+		AT24CXX_WriteLenByte(AT24Cxx_RebootTimes_ADDR,reboottimes,4);
+	}
+	
+	
+}
 
 //开始任务函数
 void start_task(void *p_arg)
@@ -297,7 +336,7 @@ void start_task(void *p_arg)
 	 //使能时间片轮转调度功能,时间片长度为1个系统时钟节拍，既1*5=5ms
 	OSSchedRoundRobinCfg(DEF_ENABLED,1,&err);  
 #endif		
-
+  HardWare_Check();
   MainCtrlUnit_Init();
 	
 	OS_CRITICAL_ENTER();	//进入临界区

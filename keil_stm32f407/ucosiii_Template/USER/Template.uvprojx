@@ -337,7 +337,7 @@
               <MiscControls></MiscControls>
               <Define>STM32F40_41xxx,USE_STDPERIPH_DRIVER,__FPU_USED=1</Define>
               <Undefine></Undefine>
-              <IncludePath>..\CORE;..\FWLIB\inc;..\SYSTEM\delay;..\SYSTEM\sys;..\SYSTEM\usart;..\UCOSIII\uC-LIB;..\UCOSIII\uC-CPU;..\UCOSIII\uCOS-III;..\UCOSIII\UCOS_BSP;..\UCOSIII\UCOS_CONFIG;..\UCOSIII\uCOS-III\Source;..\UCOSIII\uC-CPU\ARM-Cortex-M4\RealView;..\UCOSIII\uC-LIB\Ports\ARM-Cortex-M4\RealView;..\UCOSIII\uCOS-III\Ports\ARM-Cortex-M4\Generic\RealView;..\APP;..\HARDWARE\DMA;..\HARDWARE\IWDG;..\HARDWARE\TIMER;..\HARDWARE\GPIO;..\APP\common;..\APP\queue;..\HARDWARE\RTC</IncludePath>
+              <IncludePath>..\CORE;..\FWLIB\inc;..\SYSTEM\delay;..\SYSTEM\sys;..\SYSTEM\usart;..\UCOSIII\uC-LIB;..\UCOSIII\uC-CPU;..\UCOSIII\uCOS-III;..\UCOSIII\UCOS_BSP;..\UCOSIII\UCOS_CONFIG;..\UCOSIII\uCOS-III\Source;..\UCOSIII\uC-CPU\ARM-Cortex-M4\RealView;..\UCOSIII\uC-LIB\Ports\ARM-Cortex-M4\RealView;..\UCOSIII\uCOS-III\Ports\ARM-Cortex-M4\Generic\RealView;..\APP;..\HARDWARE\DMA;..\HARDWARE\IWDG;..\HARDWARE\TIMER;..\HARDWARE\GPIO;..\APP\common;..\APP\queue;..\HARDWARE\RTC;..\HARDWARE\IIC;..\HARDWARE\24CXX</IncludePath>
             </VariousControls>
           </Cads>
           <Aads>
@@ -836,6 +836,16 @@
               <FileType>1</FileType>
               <FilePath>..\HARDWARE\RTC\rtc.c</FilePath>
             </File>
+            <File>
+              <FileName>24cxx.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\HARDWARE\24CXX\24cxx.c</FilePath>
+            </File>
+            <File>
+              <FileName>myiic.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\HARDWARE\IIC\myiic.c</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>
@@ -870,6 +880,11 @@
               <FileName>Task_RealTimeCheck.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\APP\Task_RealTimeCheck.c</FilePath>
+            </File>
+            <File>
+              <FileName>Debug.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\APP\Debug.c</FilePath>
             </File>
           </Files>
         </Group>

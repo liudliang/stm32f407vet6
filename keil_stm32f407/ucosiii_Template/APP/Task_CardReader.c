@@ -8,7 +8,7 @@
 //版本：V1.0								  
 ////////////////////////////////////////////////////////////////////////////////// 
 
-#define CARD_BAUD		        115200
+#define CARD_BAUD		        9600
 static uint32_t gReaderUartHandler;
 
 /* 初始化读卡器串口*/

@@ -28,7 +28,6 @@
 #define COM5        4
 #define COM6				5
 
-	
 #define SCREEN_COM  COM4
 #define CARD_COM    COM2
 #define METER_COM   COM5  

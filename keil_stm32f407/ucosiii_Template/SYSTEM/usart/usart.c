@@ -18,9 +18,9 @@
 STM32F10x_UART_CHAN UARTChan[N_UART_CHANNELS];
 
 
- 
-//加入以下代码,支持printf函数,而不需要选择use MicroLIB	  
+
 #if 1
+//加入以下代码,支持printf函数,而不需要选择use MicroLIB	  
 #pragma import(__use_no_semihosting)             
 //标准库需要的支持函数                 
 struct __FILE 
@@ -870,7 +870,7 @@ int Uart_IOCtrl(int32_t devDesc, int32_t cmd, void* arg)
 			OS_CRITICAL_ENTER();	//进入临界区
 			if(IS_USART_STOPBITS(*(int32_t*)arg))
 			{
-				pChan->Stopbits = *(int32_t*)arg;		 //modify by wxh 2010-11-20	   pChan->Parity = *(int32*)arg;
+				pChan->Stopbits = *(int32_t*)arg;		 //	   pChan->Parity = *(int32*)arg;
 				Uart_ParamSet(pChan);
 			}	
 			OS_CRITICAL_EXIT();	//退出临界区
@@ -880,7 +880,7 @@ int Uart_IOCtrl(int32_t devDesc, int32_t cmd, void* arg)
 			OS_CRITICAL_ENTER();	//进入临界区
 			if(IS_USART_WORD_LENGTH(*(int32_t*)arg))
 			{
-				pChan->WordLength = *(int32_t*)arg;	//modify by wxh 2010-11-20		pChan->Parity = *(int32*)arg;
+				pChan->WordLength = *(int32_t*)arg;	//		pChan->Parity = *(int32*)arg;
 				Uart_ParamSet(pChan);
 			}	
 			OS_CRITICAL_EXIT();	//退出临界区
