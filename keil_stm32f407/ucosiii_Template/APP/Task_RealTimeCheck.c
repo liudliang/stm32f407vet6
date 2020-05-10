@@ -15,10 +15,16 @@ static uint8_t iostatus[3][20] = {0};
 u16tobit_u gInputStu; /*状态量采集*/
 
 DEV_INPUT_TYPE gRealTimeCheck_Input;
+DEV_STATUS_TYPE gRealTimeCheck_Status;
 
 DEV_INPUT_TYPE *Check_GetInputDataptr(void)
 {
 	return &gRealTimeCheck_Input;
+}
+
+DEV_STATUS_TYPE *Check_GetStatusDataptr(void)
+{
+	return &gRealTimeCheck_Status;
 }
 
 /*将检测的io状态赋值给全局变量数据 */
@@ -76,8 +82,20 @@ uint8_t Check_AllInputIo(void)
 	return 0;
 }
 
-
-
+extern short DS18B20_Get_Temp(void);
+void Check_DevStatus(void)
+{
+	static uint8_t i = 0;
+	static int16_t devtemp[3] = {0};
+	
+	if(3 <= i)
+	{
+		i = i%3;
+		gRealTimeCheck_Status.temperature = (devtemp[0] + devtemp[1] + devtemp[2])/3;
+	}
+	devtemp[i] = DS18B20_Get_Temp();
+	i++;
+}
 
 
 
@@ -92,6 +110,7 @@ void RealTimeCheck_task(void *p_arg)
 	{
     Check_AllInputIo();
 		Check_TranIOStatus();
+		Check_DevStatus();
 		
 		OSTimeDlyHMSM(0,0,0,100,OS_OPT_TIME_HMSM_STRICT,&err); //延时100ms
 	}

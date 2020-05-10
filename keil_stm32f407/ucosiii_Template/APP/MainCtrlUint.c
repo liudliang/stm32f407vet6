@@ -42,4 +42,5 @@ CHARGE_TYPE *ChgData_GetRunDataPtr(void)
 void MainCtrlUnit_Init(void)
 {
 	gPtrRunData.input = Check_GetInputDataptr();
+	gPtrRunData.dev_status = Check_GetStatusDataptr();
 }

@@ -8,6 +8,7 @@
 #include "iwdg.h"
 #include "timer.h"
 #include "24cxx.h"
+#include "ds18b20.h"
 
 #include "includes.h"
 #include "os_app_hooks.h"
@@ -181,7 +182,7 @@ void float_task(void *p_arg)
 		{
 		  float_num[i]=(float)SendBuff[i]*(3.3/4096);
 		}			
-		sprintf(DEBUG_Buff,"float_num[0]=%.4f,float_num[1]=%.4f,float_num[2]=%.4f,temperature=%f\r\n",float_num[0],float_num[1],float_num[2],DMA_GetTemprate());
+		sprintf(DEBUG_Buff,"float_num[0]=%.4f,float_num[1]=%.4f,18b20=%d,temperature=%f\r\n",float_num[0],float_num[1],ChgData_GetRunDataPtr()->dev_status->temperature,DMA_GetTemprate());
     DEBUG_Printf(DEBUG_Buff);
 //		OS_CRITICAL_EXIT();		//退出临界区
 			 
@@ -279,7 +280,8 @@ void Hanrdware_Init(void)
 	sys_ADC1_Config();
 	IWDG_Init(4,1500); //与分频数为 64,重载值为 1500,溢出时间为 3s
 	TimerInit();        //定时器初始化
-	AT24CXX_Init();     
+	AT24CXX_Init();     //24C02 初始化
+  DS18B20_Init();	    //DS18B20初始化
 	
 	DEBUG_Init();
 }
@@ -291,8 +293,7 @@ void HardWare_Check(void)
 	if(AT24CXX_Check())//检测不到24c02
 	{
 		DEBUG_Printf("24C02 Check Failed!\r\n");	
-		delay_ms(300);
-		LED_Toggle(LED1);  //运行灯
+//		while(1);
 	}
 	else
 	{
@@ -306,6 +307,11 @@ void HardWare_Check(void)
 		reboottimes = Common_Hex2bcd32(reboottimes);
 //		AT24CXX_Write(0,(uint8_t*)reboottimes,4);    //以BCD码格式存储
 		AT24CXX_WriteLenByte(AT24Cxx_RebootTimes_ADDR,reboottimes,4);
+	}
+	
+	if(1 == DS18B20_Check())
+	{
+		DEBUG_Printf("DS18B20 Check Failed!\r\n");	
 	}
 	
 	

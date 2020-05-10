@@ -206,7 +206,6 @@ void DMA2_Stream0_IRQHandler(void)
 double DMA_GetTemprate(void)
 {
 	u32 adcx;
-	short result;
  	double temperate;
 	adcx=DMA_Adc1Aver[3];
 	temperate=(float)adcx*(3.3/4096);		//µÁ—π÷µ

@@ -21,6 +21,7 @@ typedef struct
 //	DEV_BMS_TYPE *bms;            /**/
 //	DEV_RELAY_TYPE *relay;
 	DEV_INPUT_TYPE *input;
+	DEV_STATUS_TYPE *dev_status;    /*设备自身各器件的状态*/
 //	DEV_LOGIC_TYPE *logic;
 //	START_PARAM *startparam;
 //	CALCBILL_DATA_ST *bill;
