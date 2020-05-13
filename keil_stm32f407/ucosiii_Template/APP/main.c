@@ -9,6 +9,7 @@
 #include "timer.h"
 #include "24cxx.h"
 #include "ds18b20.h"
+#include "w25qxx.h"
 
 #include "includes.h"
 #include "os_app_hooks.h"
@@ -158,6 +159,17 @@ void float_task(void *p_arg)
 	uint8_t SEND_BUF_SIZE = 20;
   uint16_t *SendBuff = DMA_GetAdcAver();
 		
+//-----------------test spi func
+	const u8 TEXT_Buffer[]={"Explorer STM32F4 SPI TEST"};
+	u32 FLASH_SIZE=16*1024*1024;	//FLASH 大小为16字节
+	u8 SIZE = sizeof(TEXT_Buffer);
+	u8 datatemp[50] = {0};
+	W25QXX_Write((u8*)TEXT_Buffer,FLASH_SIZE-100,SIZE);
+	OSTimeDlyHMSM(0,0,1,0,OS_OPT_TIME_HMSM_STRICT,&err); //延时1s
+	W25QXX_Read(datatemp,FLASH_SIZE-100,SIZE);
+	DEBUG_Printf((char *)datatemp);
+//-----------------
+	
 	while(1)
 	{
 //		float_num+=0.01f;
@@ -282,6 +294,7 @@ void Hanrdware_Init(void)
 	TimerInit();        //定时器初始化
 	AT24CXX_Init();     //24C02 初始化
   DS18B20_Init();	    //DS18B20初始化
+	W25QXX_Init();			//W25QXX初始化
 	
 	DEBUG_Init();
 }
@@ -314,6 +327,10 @@ void HardWare_Check(void)
 		DEBUG_Printf("DS18B20 Check Failed!\r\n");	
 	}
 	
+	if(W25Q64 != W25QXX_ReadID())								//检测不到W25Q128
+	{
+		DEBUG_Printf("W25Q64 Check Failed!\r\n");
+	}
 	
 }
 
