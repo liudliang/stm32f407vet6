@@ -112,7 +112,7 @@ void RealTimeCheck_task(void *p_arg)
 		Check_TranIOStatus();
 		Check_DevStatus();
 		
-		OSTimeDlyHMSM(0,0,0,100,OS_OPT_TIME_HMSM_STRICT,&err); //—” ±100ms
+		OSTimeDlyHMSM(0,0,0,50,OS_OPT_TIME_HMSM_STRICT,&err); //—” ±100ms
 	}
 }
 

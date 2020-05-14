@@ -11,6 +11,8 @@
 #include "ds18b20.h"
 #include "w25qxx.h"
 
+#include "malloc.h"
+
 #include "includes.h"
 #include "os_app_hooks.h"
 
@@ -111,7 +113,7 @@ void TaskStackUsage_task(void *p_arg);
 
 
 
-//led0任务函数
+//test code任务函数
 void led1_task(void *p_arg)
 {
 	OS_ERR err;
@@ -119,6 +121,20 @@ void led1_task(void *p_arg)
 	
 	CHARGE_TYPE *PtrRunData = ChgData_GetRunDataPtr();
 	uint8_t k2status = PtrRunData->input->statu.bits.key2;
+	uint8_t k3status = PtrRunData->input->statu.bits.key3;
+	uint8_t *p = NULL;
+	
+	//-----------------test spi func
+//	const u8 TEXT_Buffer[]={"Explorer STM32F4 SPI TEST"};
+//	u32 FLASH_SIZE=16*1024*1024;	//FLASH 大小为16字节
+//	u8 SIZE = sizeof(TEXT_Buffer);
+//	u8 datatemp[50] = {0};
+//	W25QXX_Write((u8*)TEXT_Buffer,FLASH_SIZE-100,SIZE);
+//	OSTimeDlyHMSM(0,0,1,0,OS_OPT_TIME_HMSM_STRICT,&err); //延时1s
+//	W25QXX_Read(datatemp,FLASH_SIZE-100,SIZE);
+//	DEBUG_Printf((char *)datatemp);
+//-----------------
+	
 	while(1)
 	{
 		if(k2status != PtrRunData->input->statu.bits.key2)
@@ -126,11 +142,22 @@ void led1_task(void *p_arg)
 			k2status = PtrRunData->input->statu.bits.key2;
 			if(1 == k2status)
 			{
+				p=mymalloc(SRAMIN,2048);//申请2K字节  
 				LED_Toggle(LED2);
 			}
 		}
 		
-		OSTimeDlyHMSM(0,0,0,20,OS_OPT_TIME_HMSM_STRICT,&err); //延时500ms
+		if(k3status != PtrRunData->input->statu.bits.key3)
+		{
+			k3status = PtrRunData->input->statu.bits.key3;
+			if(1 == k3status)
+			{
+				myfree(SRAMIN,p);//释放内存
+				LED_Toggle(LED3);
+			}
+		}
+		
+		OSTimeDlyHMSM(0,0,0,20,OS_OPT_TIME_HMSM_STRICT,&err); //延时20ms
 	}
 }
 
@@ -158,17 +185,8 @@ void float_task(void *p_arg)
 	float pro=0;//进度
 	uint8_t SEND_BUF_SIZE = 20;
   uint16_t *SendBuff = DMA_GetAdcAver();
-		
-//-----------------test spi func
-	const u8 TEXT_Buffer[]={"Explorer STM32F4 SPI TEST"};
-	u32 FLASH_SIZE=16*1024*1024;	//FLASH 大小为16字节
-	u8 SIZE = sizeof(TEXT_Buffer);
-	u8 datatemp[50] = {0};
-	W25QXX_Write((u8*)TEXT_Buffer,FLASH_SIZE-100,SIZE);
-	OSTimeDlyHMSM(0,0,1,0,OS_OPT_TIME_HMSM_STRICT,&err); //延时1s
-	W25QXX_Read(datatemp,FLASH_SIZE-100,SIZE);
-	DEBUG_Printf((char *)datatemp);
-//-----------------
+	
+	
 	
 	while(1)
 	{
@@ -239,6 +257,9 @@ void TaskStackUsage_task(void *p_arg)
 		sprintf(DEBUG_Buff,"RealTimeCheckTaskTCB used/free:%d/%d  usage:%%%d\r\n",used,free,(used*100)/(used+free));
 		DEBUG_Printf(DEBUG_Buff);
 		
+		sprintf(DEBUG_Buff,"mymalloc size/useage:%d/%d\r\n", MEM1_MAX_SIZE,my_mem_perused(SRAMIN));
+		DEBUG_Printf(DEBUG_Buff);
+		
 		DEBUG_Printf("\r\n\r\n\r\n");
 		
 		OSTimeDlyHMSM(0,0,3,0,OS_OPT_TIME_HMSM_STRICT,&err); //延时3s
@@ -295,6 +316,8 @@ void Hanrdware_Init(void)
 	AT24CXX_Init();     //24C02 初始化
   DS18B20_Init();	    //DS18B20初始化
 	W25QXX_Init();			//W25QXX初始化
+	
+	my_mem_init(SRAMIN);		//初始化内部内存池
 	
 	DEBUG_Init();
 }

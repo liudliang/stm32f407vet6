@@ -337,7 +337,7 @@
               <MiscControls></MiscControls>
               <Define>STM32F40_41xxx,USE_STDPERIPH_DRIVER,__FPU_USED=1</Define>
               <Undefine></Undefine>
-              <IncludePath>..\CORE;..\FWLIB\inc;..\SYSTEM\delay;..\SYSTEM\sys;..\SYSTEM\usart;..\UCOSIII\uC-LIB;..\UCOSIII\uC-CPU;..\UCOSIII\uCOS-III;..\UCOSIII\UCOS_BSP;..\UCOSIII\UCOS_CONFIG;..\UCOSIII\uCOS-III\Source;..\UCOSIII\uC-CPU\ARM-Cortex-M4\RealView;..\UCOSIII\uC-LIB\Ports\ARM-Cortex-M4\RealView;..\UCOSIII\uCOS-III\Ports\ARM-Cortex-M4\Generic\RealView;..\APP;..\HARDWARE\DMA;..\HARDWARE\IWDG;..\HARDWARE\TIMER;..\HARDWARE\GPIO;..\APP\common;..\APP\queue;..\HARDWARE\RTC;..\HARDWARE\IIC;..\HARDWARE\24CXX;..\HARDWARE\DS18B20;..\HARDWARE\SPI;..\HARDWARE\W25QXX</IncludePath>
+              <IncludePath>..\CORE;..\FWLIB\inc;..\SYSTEM\delay;..\SYSTEM\sys;..\SYSTEM\usart;..\UCOSIII\uC-LIB;..\UCOSIII\uC-CPU;..\UCOSIII\uCOS-III;..\UCOSIII\UCOS_BSP;..\UCOSIII\UCOS_CONFIG;..\UCOSIII\uCOS-III\Source;..\UCOSIII\uC-CPU\ARM-Cortex-M4\RealView;..\UCOSIII\uC-LIB\Ports\ARM-Cortex-M4\RealView;..\UCOSIII\uCOS-III\Ports\ARM-Cortex-M4\Generic\RealView;..\APP;..\HARDWARE\DMA;..\HARDWARE\IWDG;..\HARDWARE\TIMER;..\HARDWARE\GPIO;..\APP\common;..\APP\queue;..\HARDWARE\RTC;..\HARDWARE\IIC;..\HARDWARE\24CXX;..\HARDWARE\DS18B20;..\HARDWARE\SPI;..\HARDWARE\W25QXX;..\HARDWARE\SRAM;..\APP\malloc</IncludePath>
             </VariousControls>
           </Cads>
           <Aads>
@@ -861,6 +861,11 @@
               <FileType>1</FileType>
               <FilePath>..\HARDWARE\W25QXX\w25qxx.c</FilePath>
             </File>
+            <File>
+              <FileName>sram.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\HARDWARE\SRAM\sram.c</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>
@@ -935,6 +940,16 @@
               <FileName>queue.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\APP\queue\queue.c</FilePath>
+            </File>
+          </Files>
+        </Group>
+        <Group>
+          <GroupName>MALLOC</GroupName>
+          <Files>
+            <File>
+              <FileName>malloc.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\APP\malloc\malloc.c</FilePath>
             </File>
           </Files>
         </Group>
