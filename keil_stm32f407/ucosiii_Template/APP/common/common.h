@@ -15,21 +15,21 @@
 //#include "Adebug.h"
 
 
-#define TIM_1S		(OS_TICKS_PER_SEC) /* 每隔10ms计时，总共1S */
-#define TIM_2S		(OS_TICKS_PER_SEC*2) /* 每隔10ms计时，总共1S */
-#define TIM_3S		(OS_TICKS_PER_SEC*3) /* 每隔10ms计时，总共1S */
-#define TIM_4S		(OS_TICKS_PER_SEC*4) /* 每隔10ms计时，总共1S */
-#define TIM_5S		(OS_TICKS_PER_SEC*5) /* 每隔10ms计时，总共1S */
-#define TIM_10S	(OS_TICKS_PER_SEC*10)/* 10s */
+#define TIM_1S		(OSCfg_TickRate_Hz) /* 每隔10ms计时，总共1S */
+#define TIM_2S		(OSCfg_TickRate_Hz*2) /* 每隔10ms计时，总共1S */
+#define TIM_3S		(OSCfg_TickRate_Hz*3) /* 每隔10ms计时，总共1S */
+#define TIM_4S		(OSCfg_TickRate_Hz*4) /* 每隔10ms计时，总共1S */
+#define TIM_5S		(OSCfg_TickRate_Hz*5) /* 每隔10ms计时，总共1S */
+#define TIM_10S	(OSCfg_TickRate_Hz*10)/* 10s */
 
-#define TIM_NS(n)		(OS_TICKS_PER_SEC*(n)) /* 每隔10ms计时，总共1S */
+#define TIM_NS(n)		(OSCfg_TickRate_Hz*(n)) /* 每隔10ms计时，总共1S */
 
-#define TIM_1MIN	(OS_TICKS_PER_SEC*60)/* 1min */
-#define TIM_100MS (OS_TICKS_PER_SEC/10)
-#define TIM_NMIN(n)	(OS_TICKS_PER_SEC*60*(n))/* 1min */
+#define TIM_1MIN	(OSCfg_TickRate_Hz*60)/* 1min */
+#define TIM_100MS (OSCfg_TickRate_Hz/10)
+#define TIM_NMIN(n)	(OSCfg_TickRate_Hz*60*(n))/* 1min */
 
-#define TIM_1MIN	(OS_TICKS_PER_SEC*60)/* 1min */
-#define TIM_10MS ((OS_TICKS_PER_SEC)/100)
+#define TIM_1MIN	(OSCfg_TickRate_Hz*60)/* 1min */
+#define TIM_10MS ((OSCfg_TickRate_Hz)/100)
 
 
 #define COMMON_RTN_ERR 0

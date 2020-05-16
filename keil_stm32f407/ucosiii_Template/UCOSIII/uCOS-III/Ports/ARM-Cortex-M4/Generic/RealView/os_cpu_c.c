@@ -386,9 +386,10 @@ void  OSTaskSwHook (void)
 * Note(s)    : 1) This function is assumed to be called from the Tick ISR.
 *********************************************************************************************************
 */
-
+uint32_t gSystemTick = 0; // ºÁÃë¶¨Ê±Æ÷
 void  OSTimeTickHook (void)
 {
+	  gSystemTick++;
 #if OS_CFG_APP_HOOKS_EN > 0u
     if (OS_AppTimeTickHookPtr != (OS_APP_HOOK_VOID)0) {
         (*OS_AppTimeTickHookPtr)();

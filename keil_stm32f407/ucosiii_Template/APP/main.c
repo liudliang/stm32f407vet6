@@ -123,12 +123,13 @@ void led1_task(void *p_arg)
 	uint8_t k2status = PtrRunData->input->statu.bits.key2;
 	uint8_t k3status = PtrRunData->input->statu.bits.key3;
 	uint8_t *p = NULL;
-	
+	uint32_t tmptick = 0;
+	u8 datatemp[50] = {0};
 	//-----------------test spi func
 //	const u8 TEXT_Buffer[]={"Explorer STM32F4 SPI TEST"};
 //	u32 FLASH_SIZE=16*1024*1024;	//FLASH 大小为16字节
 //	u8 SIZE = sizeof(TEXT_Buffer);
-//	u8 datatemp[50] = {0};
+//	
 //	W25QXX_Write((u8*)TEXT_Buffer,FLASH_SIZE-100,SIZE);
 //	OSTimeDlyHMSM(0,0,1,0,OS_OPT_TIME_HMSM_STRICT,&err); //延时1s
 //	W25QXX_Read(datatemp,FLASH_SIZE-100,SIZE);
@@ -157,7 +158,11 @@ void led1_task(void *p_arg)
 			}
 		}
 		
-		OSTimeDlyHMSM(0,0,0,20,OS_OPT_TIME_HMSM_STRICT,&err); //延时20ms
+		tmptick = GetSystemTick();
+		sprintf(DEBUG_Buff,"CPU tick times:%d\r\n", tmptick);
+		DEBUG_Printf(DEBUG_Buff);
+		
+		OSTimeDlyHMSM(0,0,2,20,OS_OPT_TIME_HMSM_STRICT,&err); //延时20ms
 	}
 }
 
