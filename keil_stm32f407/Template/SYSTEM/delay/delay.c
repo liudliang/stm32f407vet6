@@ -225,7 +225,10 @@ void delay_ms(u16 nms)
 #endif
 			 
 
-
+void Delay(__IO uint32_t nCount)
+{
+  delay_ms(nCount);
+}
 
 
 
