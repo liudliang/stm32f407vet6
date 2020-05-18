@@ -10,6 +10,8 @@
 #include "24cxx.h"
 #include "ds18b20.h"
 #include "w25qxx.h"
+#include "lwip_comm.h"
+#include "lwipopts.h"
 
 #include "malloc.h"
 
@@ -49,7 +51,7 @@ void start_task(void *p_arg);
 //任务优先级
 #define LED1_TASK_PRIO		4
 //任务堆栈大小	
-#define LED1_STK_SIZE 		128
+#define LED1_STK_SIZE 		128*4
 //任务控制块
 OS_TCB Led1TaskTCB;
 //任务堆栈	
@@ -136,6 +138,17 @@ void led1_task(void *p_arg)
 //	DEBUG_Printf((char *)datatemp);
 //-----------------
 	
+//-----------------test lwip
+	while(lwip_comm_init()) 		//lwip初始化
+	{
+		DEBUG_Printf("Lwip Init failed!\r\n"); 	//lwip初始化失败
+		OSTimeDlyHMSM(0,0,2,0,OS_OPT_TIME_HMSM_STRICT,&err);  
+	}
+#if LWIP_DHCP
+	lwip_comm_dhcp_creat(); //创建DHCP任务
+#endif
+//-----------------	
+	
 	while(1)
 	{
 		if(k2status != PtrRunData->input->statu.bits.key2)
@@ -143,7 +156,7 @@ void led1_task(void *p_arg)
 			k2status = PtrRunData->input->statu.bits.key2;
 			if(1 == k2status)
 			{
-				p=mymalloc(SRAMIN,2048);//申请2K字节  
+//				p=mymalloc(SRAMIN,2048);//申请2K字节  
 				LED_Toggle(LED2);
 			}
 		}
@@ -153,13 +166,14 @@ void led1_task(void *p_arg)
 			k3status = PtrRunData->input->statu.bits.key3;
 			if(1 == k3status)
 			{
-				myfree(SRAMIN,p);//释放内存
+//				myfree(SRAMIN,p);//释放内存
 				LED_Toggle(LED3);
 			}
 		}
+
 		
 		tmptick = GetSystemTick();
-		sprintf(DEBUG_Buff,"CPU tick times:%d\r\n", tmptick);
+		sprintf(DEBUG_Buff,"CPU tick times:%d,ETH LINK:%d\r\n", tmptick,DP83848_GetPHYlinkStatus());
 		DEBUG_Printf(DEBUG_Buff);
 		
 		OSTimeDlyHMSM(0,0,2,20,OS_OPT_TIME_HMSM_STRICT,&err); //延时20ms
@@ -316,7 +330,7 @@ void Hanrdware_Init(void)
 	
 	InPut_OutPut_Init();
 	sys_ADC1_Config();
-	IWDG_Init(4,1500); //与分频数为 64,重载值为 1500,溢出时间为 3s
+//	IWDG_Init(4,1500); //与分频数为 64,重载值为 1500,溢出时间为 3s
 	TimerInit();        //定时器初始化
 	AT24CXX_Init();     //24C02 初始化
   DS18B20_Init();	    //DS18B20初始化
@@ -359,6 +373,7 @@ void HardWare_Check(void)
 	{
 		DEBUG_Printf("W25Q64 Check Failed!\r\n");
 	}
+	
 	
 }
 

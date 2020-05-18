@@ -221,11 +221,14 @@ void tim7_10ms_NVIC_init(void)
 	NVIC_Init(&NVIC_InitStruct);
 }
 
+
+//extern uint32_t lwip_localtime;
 void TIM7_IRQHandler(void)
 { 	
 	if(TIM_GetITStatus(TIM7,TIM_IT_Update)==SET) //溢出中断
 	{
 //		LED1=!LED1;//DS1翻转
+//		lwip_localtime +=10; //加 10
 	}
 	TIM_ClearITPendingBit(TIM7,TIM_IT_Update);  //清除中断标志位	
 }
