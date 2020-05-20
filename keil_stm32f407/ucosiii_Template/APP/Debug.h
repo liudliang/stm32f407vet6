@@ -3,6 +3,7 @@
 
 #include "sys.h"
 #include "string.h"
+#include "M_Global.h"
 
 //////////////////////////////////////////////////////////////////////////////////	 
 //¹¦ÄÜ£º   
@@ -11,6 +12,7 @@
 //°æ±¾£ºV1.0									  
 //////////////////////////////////////////////////////////////////////////////////
 
+extern u8 debug_tcp_client_flag;
 extern char DEBUG_Buff[50];
 void DEBUG_Printf(char *s);
 void DEBUG_Init(void);

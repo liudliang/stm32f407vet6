@@ -337,7 +337,7 @@
               <MiscControls></MiscControls>
               <Define>STM32F40_41xxx,USE_STDPERIPH_DRIVER,__FPU_USED=1</Define>
               <Undefine></Undefine>
-              <IncludePath>..\CORE;..\SYSTEM\delay;..\SYSTEM\sys;..\SYSTEM\usart;..\UCOSIII\uC-LIB;..\UCOSIII\uC-CPU;..\UCOSIII\uCOS-III;..\UCOSIII\UCOS_BSP;..\UCOSIII\UCOS_CONFIG;..\UCOSIII\uCOS-III\Source;..\UCOSIII\uC-CPU\ARM-Cortex-M4\RealView;..\UCOSIII\uC-LIB\Ports\ARM-Cortex-M4\RealView;..\UCOSIII\uCOS-III\Ports\ARM-Cortex-M4\Generic\RealView;..\APP;..\HARDWARE\DMA;..\HARDWARE\IWDG;..\HARDWARE\TIMER;..\HARDWARE\GPIO;..\APP\common;..\APP\queue;..\HARDWARE\RTC;..\HARDWARE\IIC;..\HARDWARE\24CXX;..\HARDWARE\DS18B20;..\HARDWARE\SPI;..\HARDWARE\W25QXX;..\HARDWARE\SRAM;..\APP\malloc;..\FWLIB\STM32F4xx_StdPeriph_Driver\inc;..\FWLIB\STM32F4x7_ETH_Driver\inc;..\LWIP\lwip-1.4.1\src\include\netif;..\LWIP\lwip_app\lwip_comm;..\HARDWARE\ETHERNET;..\LWIP\lwip-1.4.1\src\include;..\LWIP;..\LWIP\lwip-1.4.1\src\include\ipv4;..\LWIP\arch</IncludePath>
+              <IncludePath>..\CORE;..\SYSTEM\delay;..\SYSTEM\sys;..\SYSTEM\usart;..\UCOSIII\uC-LIB;..\UCOSIII\uC-CPU;..\UCOSIII\uCOS-III;..\UCOSIII\UCOS_BSP;..\UCOSIII\UCOS_CONFIG;..\UCOSIII\uCOS-III\Source;..\UCOSIII\uC-CPU\ARM-Cortex-M4\RealView;..\UCOSIII\uC-LIB\Ports\ARM-Cortex-M4\RealView;..\UCOSIII\uCOS-III\Ports\ARM-Cortex-M4\Generic\RealView;..\APP;..\HARDWARE\DMA;..\HARDWARE\IWDG;..\HARDWARE\TIMER;..\HARDWARE\GPIO;..\APP\common;..\APP\queue;..\HARDWARE\RTC;..\HARDWARE\IIC;..\HARDWARE\24CXX;..\HARDWARE\DS18B20;..\HARDWARE\SPI;..\HARDWARE\W25QXX;..\HARDWARE\SRAM;..\APP\malloc;..\FWLIB\STM32F4xx_StdPeriph_Driver\inc;..\FWLIB\STM32F4x7_ETH_Driver\inc;..\LWIP\lwip-1.4.1\src\include\netif;..\LWIP\lwip_app\lwip_comm;..\HARDWARE\ETHERNET;..\LWIP\lwip-1.4.1\src\include;..\LWIP;..\LWIP\lwip-1.4.1\src\include\ipv4;..\LWIP\arch;..\LWIP\lwip_app\tcp_client_demo</IncludePath>
             </VariousControls>
           </Cads>
           <Aads>
@@ -1267,6 +1267,11 @@
               <FileName>lwip_comm.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\LWIP\lwip_app\lwip_comm\lwip_comm.c</FilePath>
+            </File>
+            <File>
+              <FileName>tcp_client_demo.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\LWIP\lwip_app\tcp_client_demo\tcp_client_demo.c</FilePath>
             </File>
           </Files>
         </Group>

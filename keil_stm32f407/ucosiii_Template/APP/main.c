@@ -12,6 +12,7 @@
 #include "w25qxx.h"
 #include "lwip_comm.h"
 #include "lwipopts.h"
+#include "tcp_client_demo.h"
 
 #include "malloc.h"
 
@@ -37,10 +38,7 @@
 //广州市星翼电子科技有限公司  
 //作者：正点原子 @ALIENTEK
 
-//任务优先级
-#define START_TASK_PRIO		3
-//任务堆栈大小	
-#define START_STK_SIZE 		512
+
 //任务控制块
 OS_TCB StartTaskTCB;
 //任务堆栈	
@@ -48,30 +46,14 @@ CPU_STK START_TASK_STK[START_STK_SIZE];
 //任务函数
 void start_task(void *p_arg);
 
-//任务优先级
-#define LED1_TASK_PRIO		4
-//任务堆栈大小	
-#define LED1_STK_SIZE 		128*4
-//任务控制块
-OS_TCB Led1TaskTCB;
-//任务堆栈	
-CPU_STK LED1_TASK_STK[LED1_STK_SIZE];
-void led1_task(void *p_arg);
 
-////任务优先级
-//#define LED2_TASK_PRIO		5
-////任务堆栈大小	
-//#define LED2_STK_SIZE 		128
-////任务控制块
-//OS_TCB Led2TaskTCB;
-////任务堆栈	
-//CPU_STK LED2_TASK_STK[LED2_STK_SIZE];
-////任务函数
-//void led2_task(void *p_arg);
-//任务优先级
-#define CARDREADER_TASK_PRIO		5
-//任务堆栈大小	
-#define CARDREADER_STK_SIZE 		128
+//任务控制块
+OS_TCB TestTaskTCB;
+//任务堆栈	
+CPU_STK TEST_TASK_STK[TEST_STK_SIZE];
+void test_task(void *p_arg);
+
+
 //任务控制块
 OS_TCB CardReaderTaskTCB;
 //任务堆栈	
@@ -79,10 +61,7 @@ CPU_STK CARDREADER_TASK_STK[CARDREADER_STK_SIZE];
 //任务函数
 void CardReader_task(void *p_arg);
 
-//任务优先级
-#define FLOAT_TASK_PRIO		6
-//任务堆栈大小
-#define FLOAT_STK_SIZE		256
+
 //任务控制块
 OS_TCB	FloatTaskTCB;
 //任务堆栈
@@ -91,10 +70,7 @@ CPU_STK	FLOAT_TASK_STK[FLOAT_STK_SIZE];
 void float_task(void *p_arg);
 
 
-//任务优先级
-#define RealTimeCheck_TASK_PRIO		7
-//任务堆栈大小
-#define RealTimeCheck_STK_SIZE		128
+
 //任务控制块
 OS_TCB	RealTimeCheckTaskTCB;
 //任务堆栈
@@ -103,10 +79,7 @@ CPU_STK	RealTimeCheck_TASK_STK[RealTimeCheck_STK_SIZE];
 void RealTimeCheck_task(void *p_arg);
 
 
-//任务优先级
-#define TaskStackUsage_TASK_PRIO		30
-//任务堆栈大小	
-#define TaskStackUsage_STK_SIZE 		128
+
 //任务控制块
 OS_TCB TaskStackUsageTaskTCB;
 //任务堆栈	
@@ -116,7 +89,7 @@ void TaskStackUsage_task(void *p_arg);
 
 
 //test code任务函数
-void led1_task(void *p_arg)
+void test_task(void *p_arg)
 {
 	OS_ERR err;
 	p_arg = p_arg;
@@ -144,6 +117,13 @@ void led1_task(void *p_arg)
 		DEBUG_Printf("Lwip Init failed!\r\n"); 	//lwip初始化失败
 		OSTimeDlyHMSM(0,0,2,0,OS_OPT_TIME_HMSM_STRICT,&err);  
 	}
+	
+	while(tcp_client_init()) 									//初始化tcp_client(创建tcp_client线程)
+	{
+		DEBUG_Printf("TCP Client failed!!\r\n"); 		//tcp创建失败
+		OSTimeDlyHMSM(0,0,2,0,OS_OPT_TIME_HMSM_STRICT,&err); 
+	}
+	
 #if LWIP_DHCP
 	lwip_comm_dhcp_creat(); //创建DHCP任务
 #endif
@@ -158,6 +138,7 @@ void led1_task(void *p_arg)
 			{
 //				p=mymalloc(SRAMIN,2048);//申请2K字节  
 				LED_Toggle(LED2);
+				tcp_client_flag|=LWIP_SEND_DATA; //标记LWIP有数据要发送;
 			}
 		}
 		
@@ -168,15 +149,11 @@ void led1_task(void *p_arg)
 			{
 //				myfree(SRAMIN,p);//释放内存
 				LED_Toggle(LED3);
+				debug_tcp_client_flag|=LWIP_SEND_DATA; //标记LWIP有数据要发送;
 			}
 		}
-
 		
-		tmptick = GetSystemTick();
-		sprintf(DEBUG_Buff,"CPU tick times:%d,ETH LINK:%d\r\n", tmptick,DP83848_GetPHYlinkStatus());
-		DEBUG_Printf(DEBUG_Buff);
-		
-		OSTimeDlyHMSM(0,0,2,20,OS_OPT_TIME_HMSM_STRICT,&err); //延时20ms
+		OSTimeDlyHMSM(0,0,0,20,OS_OPT_TIME_HMSM_STRICT,&err); //延时20ms
 	}
 }
 
@@ -260,7 +237,7 @@ void TaskStackUsage_task(void *p_arg)
 		sprintf(DEBUG_Buff,"TaskStackUsageTask used/free:%d/%d  usage:%%%d\r\n",used,free,(used*100)/(used+free));
 		DEBUG_Printf(DEBUG_Buff);
 		
-		OSTaskStkChk(&Led1TaskTCB,&free,&used,&err);
+		OSTaskStkChk(&TestTaskTCB,&free,&used,&err);
 		sprintf(DEBUG_Buff,"Led1TaskTCB used/free:%d/%d  usage:%%%d\r\n",used,free,(used*100)/(used+free));
 		DEBUG_Printf(DEBUG_Buff);
 		
@@ -277,6 +254,9 @@ void TaskStackUsage_task(void *p_arg)
 		DEBUG_Printf(DEBUG_Buff);
 		
 		sprintf(DEBUG_Buff,"mymalloc size/useage:%d/%d\r\n", MEM1_MAX_SIZE,my_mem_perused(SRAMIN));
+		DEBUG_Printf(DEBUG_Buff);
+		
+		sprintf(DEBUG_Buff,"ETH LINK:%d\r\n",DP83848_GetPHYlinkStatus());
 		DEBUG_Printf(DEBUG_Buff);
 		
 		DEBUG_Printf("\r\n\r\n\r\n");
@@ -337,8 +317,7 @@ void Hanrdware_Init(void)
 	W25QXX_Init();			//W25QXX初始化
 	
 	my_mem_init(SRAMIN);		//初始化内部内存池
-	
-	DEBUG_Init();
+
 }
 
 void HardWare_Check(void)
@@ -404,6 +383,10 @@ void start_task(void *p_arg)
 #endif		
   HardWare_Check();
   MainCtrlUnit_Init();
+
+#ifdef DEBUG_ON   //调试打开	
+	DEBUG_Init();
+#endif
 	
 	OS_CRITICAL_ENTER();	//进入临界区
 	
@@ -423,14 +406,14 @@ void start_task(void *p_arg)
                  (OS_ERR 	* )&err);
 	
 	//创建LED1任务
-	OSTaskCreate((OS_TCB 	* )&Led1TaskTCB,		
-				 (CPU_CHAR	* )"led1 task", 		
-                 (OS_TASK_PTR )led1_task, 			
+	OSTaskCreate((OS_TCB 	* )&TestTaskTCB,		
+				 (CPU_CHAR	* )"test task", 		
+                 (OS_TASK_PTR )test_task, 			
                  (void		* )0,					
-                 (OS_PRIO	  )LED1_TASK_PRIO,     
-                 (CPU_STK   * )&LED1_TASK_STK[0],	
-                 (CPU_STK_SIZE)LED1_STK_SIZE/10,	
-                 (CPU_STK_SIZE)LED1_STK_SIZE,		
+                 (OS_PRIO	  )TEST_TASK_PRIO,     
+                 (CPU_STK   * )&TEST_TASK_STK[0],	
+                 (CPU_STK_SIZE)TEST_STK_SIZE/10,	
+                 (CPU_STK_SIZE)TEST_STK_SIZE,		
                  (OS_MSG_QTY  )0,					
                  (OS_TICK	  )0,					
                  (void   	* )0,					
