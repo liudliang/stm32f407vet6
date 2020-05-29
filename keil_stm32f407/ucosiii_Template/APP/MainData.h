@@ -159,6 +159,16 @@ typedef struct
 
 
 
+typedef  struct  
+{
+	uint16_t head;        /*存储时使用*/
+	uint16_t reboottime;  /**/
+	uint8_t  temprature;
+	uint16_t crc;         /*存储时使用*/
+	char *end;
+}TEST_DATA_TYPE;
+
+
 #pragma pack()
 
 

@@ -15,6 +15,8 @@
 #include "tcp_client_demo.h"
 
 #include "malloc.h"
+#include "src/ff.h"
+#include "exfuns/exfuns.h"
 
 #include "includes.h"
 #include "os_app_hooks.h"
@@ -88,6 +90,154 @@ void TaskStackUsage_task(void *p_arg);
 
 
 
+
+
+/*
+*********************************************************************************************************
+*	函 数 名: CreateNewFile
+*	功能说明: 在SD卡创建一个新文件，文件内容填写“www.armfly.com”
+*	形    参：无
+*	返 回 值: 无
+*********************************************************************************************************
+*/
+static void CreateNewFile(void)
+{
+	/* 本函数使用的局部变量占用较多，请修改启动文件，保证堆栈空间够用 */
+	FRESULT result;
+	FATFS *fs = mymalloc(SRAMIN,sizeof(FATFS));		//为file申请内存
+	DIR *DirInf = mymalloc(SRAMIN,sizeof(DIR));		//为file申请内存
+	FIL *file = (FIL *)mymalloc(SRAMIN,sizeof(FIL));		//为file申请内存
+	
+	if((NULL == DirInf) || (NULL == file) )
+	{
+		myfree(SRAMIN,fs);//释放内存
+		myfree(SRAMIN,DirInf);//释放内存
+		myfree(SRAMIN,file);//释放内存
+		DEBUG_Printf("malloc ViewRootDir failed!");
+		return ;
+	}
+  uint32_t bw;
+// 	/* 挂载文件系统 */
+//	result = f_mount(FS_USB, &fs);			/* Mount a logical drive */
+//	if (result != FR_OK)
+//	{
+//		printf("挂载文件系统失败 (%d)\r\n", result);
+//	}
+//	result = f_mount(fs,"1:",1);
+
+//	/* 打开根文件夹 */
+//	result = f_opendir(DirInf, "1:"); /* 如果不带参数，则从当前目录开始 */
+//	if (result != FR_OK)
+//	{
+//		printf("打开根目录失败 (%d)\r\n", result);
+//	}
+
+	/* 打开文件 */
+	result = f_open(file, "1:STM32F407.txt", FA_WRITE);
+	if( (result != FR_OK) && (result != FR_EXIST) )
+	{
+		printf("打开STM32F407.txt 文件失败！！\r\n");
+	}
+
+	/* 写一串数据 */
+	result = f_write(file, "FatFS Write Demo2\r\n", 34, &bw);
+	if (result == FR_OK)
+	{
+		printf("STM32F407.txt 文件写入成功\r\n");
+	}
+	else
+	{
+		printf("STM32F407.txt 文件写入失败\r\n");
+	}
+
+	/* 关闭文件*/
+	f_close(file);
+	/* 卸载文件系统 */
+	f_mount(fs, "1:", NULL);
+
+//	/* 卸载文件系统 */
+//	f_mount(FS_USB, NULL);
+			myfree(SRAMIN,fs);//释放内存
+		myfree(SRAMIN,DirInf);//释放内存
+		myfree(SRAMIN,file);//释放内存
+}
+
+/*
+*********************************************************************************************************
+*	函 数 名: ReadFileData
+*	功能说明: 读取文件armfly.txt前128个字符，并打印到串口
+*	形    参：无
+*	返 回 值: 无
+*********************************************************************************************************
+*/
+static void ReadFileData(void)
+{
+	/* 本函数使用的局部变量占用较多，请修改启动文件，保证堆栈空间够用 */
+	FRESULT result;
+	FATFS *fs = mymalloc(SRAMIN,sizeof(fs));		//为file申请内存
+	DIR *DirInf = mymalloc(SRAMIN,sizeof(DirInf));		//为file申请内存
+	FIL *file = mymalloc(SRAMIN,sizeof(file));		//为file申请内存
+	
+	if((NULL == fs) || (NULL == DirInf) || (NULL == file) )
+	{
+		myfree(SRAMIN,fs);//释放内存
+		myfree(SRAMIN,DirInf);//释放内存
+		myfree(SRAMIN,file);//释放内存
+		DEBUG_Printf("malloc ViewRootDir failed!");
+		return ;
+	}
+	uint32_t bw;
+	char buf[128];
+
+// 	/* 挂载文件系统 */
+//	result = f_mount(FS_USB, &fs);			/* Mount a logical drive */
+//	if (result != FR_OK)
+//	{
+//		printf("挂载文件系统失败(%d)\r\n", result);
+//	}
+
+	/* 打开根文件夹 */
+	result = f_opendir(DirInf, "1:"); /* 如果不带参数，则从当前目录开始 */
+	if (result != FR_OK)
+	{
+		printf("打开根目录失败(%d)\r\n", result);
+		return;
+	}
+
+	/* 打开文件 */
+	result = f_open(file, "1:STM32F407.txt", FA_OPEN_EXISTING | FA_READ);
+	if (result !=  FR_OK)
+	{
+		printf("Don't Find File : STM32F407.txt\r\n");
+		return;
+	}
+
+	/* 读取文件 */
+	result = f_read(file, &buf, sizeof(buf) - 1, &bw);
+	if (bw > 0)
+	{
+		buf[bw] = 0;
+		printf("\r\nSTM32F407.txt 文件内容 : \r\n%s\r\n", buf);
+	}
+	else
+	{
+		printf("\r\nSTM32F407.txt 文件内容 : \r\n");
+	}
+
+	/* 关闭文件*/
+	f_close(file);
+
+//	/* 卸载文件系统 */
+//	f_mount(FS_USB, NULL);
+	
+			myfree(SRAMIN,fs);//释放内存
+		myfree(SRAMIN,DirInf);//释放内存
+		myfree(SRAMIN,file);//释放内存
+}
+
+//-----------------------------------------------------------
+
+
 //test code任务函数
 void test_task(void *p_arg)
 {
@@ -97,9 +247,10 @@ void test_task(void *p_arg)
 	CHARGE_TYPE *PtrRunData = ChgData_GetRunDataPtr();
 	uint8_t k2status = PtrRunData->input->statu.bits.key2;
 	uint8_t k3status = PtrRunData->input->statu.bits.key3;
-	uint8_t *p = NULL;
-	uint32_t tmptick = 0;
+	uint8_t *p = NULL,*pBuffer = NULL;
+	uint8_t result = 0;
 	u8 datatemp[50] = {0};
+	u16 reboottimes;
 	//-----------------test spi func
 //	const u8 TEXT_Buffer[]={"Explorer STM32F4 SPI TEST"};
 //	u32 FLASH_SIZE=16*1024*1024;	//FLASH 大小为16字节
@@ -128,6 +279,58 @@ void test_task(void *p_arg)
 	lwip_comm_dhcp_creat(); //创建DHCP任务
 #endif
 //-----------------	
+	
+//--------------------------test fatfs
+  exfuns_ViewRootDir();
+	
+//	CreateNewFile();
+//	ReadFileData();
+//	ViewRootDir();
+	
+	TEST_DATA_TYPE test_fatfs_data;
+	SST_Rd_BufferRead((u8 *)datatemp,0, sizeof(datatemp), "1:STM32F407.txt");
+	sprintf(DEBUG_Buff,"fatfs_test txtdata is %s!!\r\n",datatemp);
+	DEBUG_Printf(DEBUG_Buff);	
+	
+	memset(datatemp,0,sizeof(datatemp));
+	SST_Rd_BufferRead(datatemp,0, sizeof(test_fatfs_data), "1:test.data");
+	sprintf(DEBUG_Buff,"fatfs_test data is %s!!\r\n",datatemp);
+	DEBUG_Printf(DEBUG_Buff);	
+	
+	reboottimes = AT24CXX_ReadLenByte(AT24Cxx_RebootTimes_ADDR,4);
+	reboottimes = Common_Bcd2hex32(reboottimes);
+	test_fatfs_data.head = 0x7576;
+	test_fatfs_data.reboottime = reboottimes;
+	test_fatfs_data.temprature = DMA_GetTemprate();
+	test_fatfs_data.crc = Crc16_Calc((uint8_t *)&test_fatfs_data,sizeof(TEST_DATA_TYPE)-2);
+	test_fatfs_data.end = "\r";
+//	test_fatfs_data.end++;
+//	test_fatfs_data.end = "\n";
+//  uint16_t test4kbuf[5000] = {0};
+//	memset(&test4kbuf,'1',5000);
+//	test4kbuf[4999] = 'b';
+	pBuffer = (uint8_t *)mymalloc(SRAMIN,5000);;//&test_fatfs_data;
+	u16 j;
+	for(j = 0; j < 4999; j++) *(pBuffer + j) = '1';
+	*(pBuffer + j) = 'b';
+	SST_Rd_BufferWrite(pBuffer, 0, 5000, "1:test.data");
+	OSTimeDlyHMSM(0,0,1,0,OS_OPT_TIME_HMSM_STRICT,&err); 
+
+//	memset(&test_fatfs_data,0,sizeof(test_fatfs_data));
+//	memset(&test4kbuf,0,5000);
+for(u16 j = 0; j < 5000; j++) *(pBuffer + j) = 0;
+	SST_Rd_BufferRead(pBuffer,0, 5000, "1:test.data");	
+	sprintf(DEBUG_Buff,"fatfs_test data is %c!!\r\n",pBuffer[4999]);
+	myfree(SRAMIN,pBuffer);
+	
+	DEBUG_Printf(DEBUG_Buff);	
+	exfuns_ViewRootDir();
+	
+	u32 total,free;
+	exf_getfree("1:",&total,&free);
+	sprintf(DEBUG_Buff,"fatfs data Total/FREE %d/%d!!\r\n",total,free);
+	DEBUG_Printf(DEBUG_Buff);
+//--------------------------	
 	
 	while(1)
 	{
@@ -317,17 +520,22 @@ void Hanrdware_Init(void)
 	W25QXX_Init();			//W25QXX初始化
 	
 	my_mem_init(SRAMIN);		//初始化内部内存池
+	
 
 }
 
+
+
+
 void HardWare_Check(void)
 {
-	uint8_t tmpdata[4] = {0};
+	OS_ERR err;
+	uint8_t res = 0,tmpdata[4] = {0};
 	uint32_t reboottimes = 0;
 	if(AT24CXX_Check())//检测不到24c02
 	{
 		DEBUG_Printf("24C02 Check Failed!\r\n");	
-//		while(1);
+		while(1);
 	}
 	else
 	{
@@ -351,6 +559,49 @@ void HardWare_Check(void)
 	if(W25Q64 != W25QXX_ReadID())								//检测不到W25Q128
 	{
 		DEBUG_Printf("W25Q64 Check Failed!\r\n");
+	}
+	else
+	{
+		if(1 == exfuns_init())							//为fatfs相关变量申请内存		
+		{
+			DEBUG_Printf("fatfs Disk malloc false!");
+			while(1);
+		}			
+//  	f_mount(fs[0],"0:",1); 					//挂载SD卡 
+ 	  res = f_mount(exfuns_GetfsArea(EX_FLASH),"1:",1); 				//挂载FLASH.	
+//		if(FR_OK != res)//FLASH磁盘,FAT文件系统错误,重新格式化FLASH
+//	  {
+//		  DEBUG_Printf("Flash Disk Formatting...");	//格式化FLASH
+//		  res=f_mkfs("1:",1,4096);//格式化FLASH,1,盘符;1,不需要引导区,8个扇区为1个簇
+//		  if(res==0)
+//		  {
+//			  f_setlabel((const TCHAR *)"1:test.data");	//设置Flash磁盘的名字为：test.data
+//			  DEBUG_Printf("Flash Disk Format Finish");	//格式化完成
+//		  }
+//			else 
+//				DEBUG_Printf("Flash Disk Format Error ");	//格式化失败
+//	  }			
+		
+		FIL* file=(FIL*)mymalloc(SRAMIN,sizeof(FIL));		//为file申请内存
+		if(NULL == file)
+		{
+			myfree(SRAMIN,file);//释放内存
+			DEBUG_Printf("malloc file ptr failed!");
+			while(1);
+		}
+		res=f_open(file,"1:test.data",FA_READ );      // 打开文件是否存在
+	  f_close(file);
+		if(FR_OK != res)//FLASH磁盘,FAT文件系统错误,重新格式化FLASH
+	  {
+		  DEBUG_Printf("Flash Disk Formatting...");	//格式化FLASH
+		  res=f_mkfs("1:",1,4096);//格式化FLASH,1,盘符;1,不需要引导区,8个扇区为1个簇	
+			res=f_open(file,"1:test.data",FA_CREATE_ALWAYS | FA_WRITE );      // 打开文件是否存在
+	    f_close(file);	
+		}			
+		
+		myfree(SRAMIN,file);//释放内存
+		
+		OSTimeDlyHMSM(0,0,1,0,OS_OPT_TIME_HMSM_STRICT,&err); //延时1s
 	}
 	
 	
@@ -381,13 +632,15 @@ void start_task(void *p_arg)
 	 //使能时间片轮转调度功能,时间片长度为1个系统时钟节拍，既1*5=5ms
 	OSSchedRoundRobinCfg(DEF_ENABLED,1,&err);  
 #endif		
-  HardWare_Check();
-  MainCtrlUnit_Init();
 
 #ifdef DEBUG_ON   //调试打开	
 	DEBUG_Init();
 #endif
-	
+
+  HardWare_Check();
+  MainCtrlUnit_Init();
+
+
 	OS_CRITICAL_ENTER();	//进入临界区
 	
 	//创建检测各任务堆栈使用情况任务

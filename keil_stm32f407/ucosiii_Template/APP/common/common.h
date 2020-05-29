@@ -9,10 +9,12 @@
 	*/
 #ifndef _COMMON_H_0001
 #define _COMMON_H_0001
+#include "crc.h"
 #include "sys.h"
 //#include "typedefs.h"
 //#include "debug.h"
 //#include "Adebug.h"
+
 
 
 #define TIM_1S		(OSCfg_TickRate_Hz) /* 每隔10ms计时，总共1S */

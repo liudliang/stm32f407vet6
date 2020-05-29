@@ -337,7 +337,7 @@
               <MiscControls></MiscControls>
               <Define>STM32F40_41xxx,USE_STDPERIPH_DRIVER,__FPU_USED=1</Define>
               <Undefine></Undefine>
-              <IncludePath>..\CORE;..\SYSTEM\delay;..\SYSTEM\sys;..\SYSTEM\usart;..\UCOSIII\uC-LIB;..\UCOSIII\uC-CPU;..\UCOSIII\uCOS-III;..\UCOSIII\UCOS_BSP;..\UCOSIII\UCOS_CONFIG;..\UCOSIII\uCOS-III\Source;..\UCOSIII\uC-CPU\ARM-Cortex-M4\RealView;..\UCOSIII\uC-LIB\Ports\ARM-Cortex-M4\RealView;..\UCOSIII\uCOS-III\Ports\ARM-Cortex-M4\Generic\RealView;..\APP;..\HARDWARE\DMA;..\HARDWARE\IWDG;..\HARDWARE\TIMER;..\HARDWARE\GPIO;..\APP\common;..\APP\queue;..\HARDWARE\RTC;..\HARDWARE\IIC;..\HARDWARE\24CXX;..\HARDWARE\DS18B20;..\HARDWARE\SPI;..\HARDWARE\W25QXX;..\HARDWARE\SRAM;..\APP\malloc;..\FWLIB\STM32F4xx_StdPeriph_Driver\inc;..\FWLIB\STM32F4x7_ETH_Driver\inc;..\LWIP\lwip-1.4.1\src\include\netif;..\LWIP\lwip_app\lwip_comm;..\HARDWARE\ETHERNET;..\LWIP\lwip-1.4.1\src\include;..\LWIP;..\LWIP\lwip-1.4.1\src\include\ipv4;..\LWIP\arch;..\LWIP\lwip_app\tcp_client_demo</IncludePath>
+              <IncludePath>..\CORE;..\SYSTEM\delay;..\SYSTEM\sys;..\SYSTEM\usart;..\UCOSIII\uC-LIB;..\UCOSIII\uC-CPU;..\UCOSIII\uCOS-III;..\UCOSIII\UCOS_BSP;..\UCOSIII\UCOS_CONFIG;..\UCOSIII\uCOS-III\Source;..\UCOSIII\uC-CPU\ARM-Cortex-M4\RealView;..\UCOSIII\uC-LIB\Ports\ARM-Cortex-M4\RealView;..\UCOSIII\uCOS-III\Ports\ARM-Cortex-M4\Generic\RealView;..\APP;..\HARDWARE\DMA;..\HARDWARE\IWDG;..\HARDWARE\TIMER;..\HARDWARE\GPIO;..\APP\common;..\APP\queue;..\HARDWARE\RTC;..\HARDWARE\IIC;..\HARDWARE\24CXX;..\HARDWARE\DS18B20;..\HARDWARE\SPI;..\HARDWARE\W25QXX;..\HARDWARE\SRAM;..\APP\malloc;..\FWLIB\STM32F4xx_StdPeriph_Driver\inc;..\FWLIB\STM32F4x7_ETH_Driver\inc;..\LWIP\lwip-1.4.1\src\include\netif;..\LWIP\lwip_app\lwip_comm;..\HARDWARE\ETHERNET;..\LWIP\lwip-1.4.1\src\include;..\LWIP;..\LWIP\lwip-1.4.1\src\include\ipv4;..\LWIP\arch;..\LWIP\lwip_app\tcp_client_demo;..\LWIP\lwip_app\ftp_client;..\FATFS</IncludePath>
             </VariousControls>
           </Cads>
           <Aads>
@@ -590,6 +590,11 @@
               <FileName>usart.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\SYSTEM\usart\usart.c</FilePath>
+            </File>
+            <File>
+              <FileName>retarget.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\SYSTEM\usart\retarget.c</FilePath>
             </File>
           </Files>
         </Group>
@@ -1273,6 +1278,41 @@
               <FileType>1</FileType>
               <FilePath>..\LWIP\lwip_app\tcp_client_demo\tcp_client_demo.c</FilePath>
             </File>
+            <File>
+              <FileName>lwftp.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\LWIP\lwip_app\ftp_client\lwftp.c</FilePath>
+            </File>
+          </Files>
+        </Group>
+        <Group>
+          <GroupName>FATFS</GroupName>
+          <Files>
+            <File>
+              <FileName>diskio.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\FATFS\src\diskio.c</FilePath>
+            </File>
+            <File>
+              <FileName>ff.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\FATFS\src\ff.c</FilePath>
+            </File>
+            <File>
+              <FileName>exfuns.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\FATFS\exfuns\exfuns.c</FilePath>
+            </File>
+            <File>
+              <FileName>cc936.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\FATFS\src\option\cc936.c</FilePath>
+            </File>
+            <File>
+              <FileName>ff_Lock.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\FATFS\exfuns\ff_Lock.c</FilePath>
+            </File>
           </Files>
         </Group>
       </Groups>
@@ -1282,7 +1322,14 @@
   <RTE>
     <apis/>
     <components/>
-    <files/>
+    <files>
+      <file attr="config" category="source" name="Network\Config\Net_Config_FTP_Client.h" version="5.0.0">
+        <instance index="0" removed="1">RTE\Network\Net_Config_FTP_Client.h</instance>
+        <component Cbundle="MDK-Plus" Cclass="Network" Cgroup="Service" Csub="FTP Client" Cvendor="Keil" Cversion="7.8.0" condition="Network TCP and File System Drive"/>
+        <package name="MDK-Middleware" schemaVersion="1.4" url="http://www.keil.com/pack/" vendor="Keil" version="7.6.0"/>
+        <targetInfos/>
+      </file>
+    </files>
   </RTE>
 
 </Project>
