@@ -11,10 +11,10 @@
 //版本：V1.0									  
 //////////////////////////////////////////////////////////////////////////////////
 
-#define DEBUG_ON   //调试打开
-#define SCOMM_DEBUG   //串口调试   
-#define ETH_DEBUG   //网口调试 
-
+#define DEBUG_ON                  //调试打开
+#define SCOMM_DEBUG               //串口调试   
+#define ETH_DEBUG                 //网口调试 
+#define USB_HOST_SUPPORT          //usb host功能支持
 
 
 /*
@@ -31,6 +31,7 @@
 #define TCPCLIENT_PRIO		        8
 #define DEBUG_TCPCLIENT_PRIO		  9
 #define LWIP_DHCP_TASK_PRIO       10
+#define USBHost_TASK_PRIO         11
 #define TaskStackUsage_TASK_PRIO	30
 
 
@@ -50,7 +51,8 @@
 #define TaskStackUsage_STK_SIZE 	 128
 #define TCPCLIENT_STK_SIZE	       300
 #define DEBUG_TCPCLIENT_STK_SIZE	 300
-#define LWIP_DHCP_STK_SIZE  		    256
+#define LWIP_DHCP_STK_SIZE  		   256
+#define USBHost_STK_SIZE 	         256
 
 
 

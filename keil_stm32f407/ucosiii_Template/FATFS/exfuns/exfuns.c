@@ -47,25 +47,42 @@ FATFS *exfuns_GetfsArea(u8 fsnum)
 	return fs[fsnum];
 }
 
+////为exfuns申请内存
+////返回值:0,成功
+////1,失败
+//u8 exfuns_init(void)
+//{
+//	u8 i;
+//	for(i=0;i<_VOLUMES;i++)
+//	{
+//		fs[i]=(FATFS*)mymalloc(SRAMIN,sizeof(FATFS));	//为磁盘i工作区申请内存	
+//		if(!fs[i])break;
+//	}
+////	file=(FIL*)mymalloc(SRAMIN,sizeof(FIL));		//为file申请内存
+////	ftemp=(FIL*)mymalloc(SRAMIN,sizeof(FIL));		//为ftemp申请内存
+////	fatbuf=(u8*)mymalloc(SRAMIN,512);				//为fatbuf申请内存
+//	if(i==_VOLUMES)//&&file&&ftemp&&fatbuf)
+//		return 0;  //申请有一个失败,即失败.
+//	else 
+//		return 1;	
+//}
+
 //为exfuns申请内存
 //返回值:0,成功
 //1,失败
-u8 exfuns_init(void)
+u8 exfuns_init(u8 disknum)
 {
-	u8 i;
-	for(i=0;i<_VOLUMES;i++)
+	fs[disknum]=(FATFS*)mymalloc(SRAMIN,sizeof(FATFS));	//为磁盘i工作区申请内存	
+	if(NULL == fs[disknum])
 	{
-		fs[i]=(FATFS*)mymalloc(SRAMIN,sizeof(FATFS));	//为磁盘i工作区申请内存	
-		if(!fs[i])break;
+		return 1;
 	}
-//	file=(FIL*)mymalloc(SRAMIN,sizeof(FIL));		//为file申请内存
-//	ftemp=(FIL*)mymalloc(SRAMIN,sizeof(FIL));		//为ftemp申请内存
-//	fatbuf=(u8*)mymalloc(SRAMIN,512);				//为fatbuf申请内存
-	if(i==_VOLUMES)//&&file&&ftemp&&fatbuf)
-		return 0;  //申请有一个失败,即失败.
-	else 
-		return 1;	
+	else
+	{
+		return 0;
+	}
 }
+
 
 //将小写字母转为大写字母,如果是数字,则保持不变.
 u8 char_upper(u8 c)
@@ -146,12 +163,12 @@ u8 exf_getfree(u8 *drv,u32 *total,u32 *free)
 /*
 *********************************************************************************************************
 *	函 数 名: exfuns_ViewRootDir
-*	功能说明: 显示SD卡根目录下的文件名
-*	形    参：无
+*	功能说明: 显示根目录下的文件名
+*	形    参：path:路径
 *	返 回 值: 
 *********************************************************************************************************
 */
-u8 exfuns_ViewRootDir(void)
+u8 exfuns_ViewRootDir(char *path)
 {
 	FRESULT result;
 	DIR *DirInf = mymalloc(SRAMIN,sizeof(DirInf));		//为DirInf申请内存
@@ -168,7 +185,7 @@ u8 exfuns_ViewRootDir(void)
 	char lfname[100];
 
 	/* 打开根文件夹 */
-	result = f_opendir(DirInf, "1:");//"/"); /* 如果不带参数，则从当前目录开始 */
+	result = f_opendir(DirInf, path);//"/"); /* 如果不带参数，则从当前目录开始 */
 	if (result != FR_OK)
 	{
 		printf("打开根目录失败 (%d)\r\n", result);

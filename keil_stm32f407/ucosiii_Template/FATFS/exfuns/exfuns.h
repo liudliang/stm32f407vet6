@@ -51,12 +51,12 @@ extern u8 *fatbuf;//SD卡数据缓存区
 #define T_AVI		0X60	//avi文件  
 
  
-u8 exfuns_init(void);							//申请内存
+u8 exfuns_init(u8 disknum);							//申请内存
 u8 f_typetell(u8 *fname);						//识别文件类型
 u8 exf_getfree(u8 *drv,u32 *total,u32 *free);	//得到磁盘总容量和剩余容量
 u32 exf_fdsize(u8 *fdname);						//得到文件夹大小	
 FATFS *exfuns_GetfsArea(u8 fsnum);
-u8 exfuns_ViewRootDir(void);
+u8 exfuns_ViewRootDir(char *path);
 
 u8 SST_Rd_BufferWrite(u8 *pBuffer, u32 WriteAddr, u16 NumByteToWrite, const TCHAR* path);////带锁的文件写操作
 u8 SST_Rd_BufferRead(u8 *recv, u32 adr, u16 size, const TCHAR* path);  //带锁的文件读操作

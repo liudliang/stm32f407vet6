@@ -90,6 +90,13 @@ void TaskStackUsage_task(void *p_arg);
 
 
 
+//任务控制块
+OS_TCB	USBHostTaskTCB;
+//任务堆栈
+CPU_STK	USBHost_TASK_STK[USBHost_STK_SIZE];
+//任务函数
+void USBHost_task(void *p_arg);
+
 
 
 /*
@@ -162,79 +169,6 @@ static void CreateNewFile(void)
 		myfree(SRAMIN,file);//释放内存
 }
 
-/*
-*********************************************************************************************************
-*	函 数 名: ReadFileData
-*	功能说明: 读取文件armfly.txt前128个字符，并打印到串口
-*	形    参：无
-*	返 回 值: 无
-*********************************************************************************************************
-*/
-static void ReadFileData(void)
-{
-	/* 本函数使用的局部变量占用较多，请修改启动文件，保证堆栈空间够用 */
-	FRESULT result;
-	FATFS *fs = mymalloc(SRAMIN,sizeof(fs));		//为file申请内存
-	DIR *DirInf = mymalloc(SRAMIN,sizeof(DirInf));		//为file申请内存
-	FIL *file = mymalloc(SRAMIN,sizeof(file));		//为file申请内存
-	
-	if((NULL == fs) || (NULL == DirInf) || (NULL == file) )
-	{
-		myfree(SRAMIN,fs);//释放内存
-		myfree(SRAMIN,DirInf);//释放内存
-		myfree(SRAMIN,file);//释放内存
-		DEBUG_Printf("malloc ViewRootDir failed!");
-		return ;
-	}
-	uint32_t bw;
-	char buf[128];
-
-// 	/* 挂载文件系统 */
-//	result = f_mount(FS_USB, &fs);			/* Mount a logical drive */
-//	if (result != FR_OK)
-//	{
-//		printf("挂载文件系统失败(%d)\r\n", result);
-//	}
-
-	/* 打开根文件夹 */
-	result = f_opendir(DirInf, "1:"); /* 如果不带参数，则从当前目录开始 */
-	if (result != FR_OK)
-	{
-		printf("打开根目录失败(%d)\r\n", result);
-		return;
-	}
-
-	/* 打开文件 */
-	result = f_open(file, "1:STM32F407.txt", FA_OPEN_EXISTING | FA_READ);
-	if (result !=  FR_OK)
-	{
-		printf("Don't Find File : STM32F407.txt\r\n");
-		return;
-	}
-
-	/* 读取文件 */
-	result = f_read(file, &buf, sizeof(buf) - 1, &bw);
-	if (bw > 0)
-	{
-		buf[bw] = 0;
-		printf("\r\nSTM32F407.txt 文件内容 : \r\n%s\r\n", buf);
-	}
-	else
-	{
-		printf("\r\nSTM32F407.txt 文件内容 : \r\n");
-	}
-
-	/* 关闭文件*/
-	f_close(file);
-
-//	/* 卸载文件系统 */
-//	f_mount(FS_USB, NULL);
-	
-			myfree(SRAMIN,fs);//释放内存
-		myfree(SRAMIN,DirInf);//释放内存
-		myfree(SRAMIN,file);//释放内存
-}
-
 //-----------------------------------------------------------
 
 
@@ -281,7 +215,7 @@ void test_task(void *p_arg)
 //-----------------	
 	
 //--------------------------test fatfs
-  exfuns_ViewRootDir();
+  exfuns_ViewRootDir("1:");
 	
 //	CreateNewFile();
 //	ReadFileData();
@@ -324,7 +258,7 @@ for(u16 j = 0; j < 5000; j++) *(pBuffer + j) = 0;
 	myfree(SRAMIN,pBuffer);
 	
 	DEBUG_Printf(DEBUG_Buff);	
-	exfuns_ViewRootDir();
+	exfuns_ViewRootDir("1:");
 	
 	u32 total,free;
 	exf_getfree("1:",&total,&free);
@@ -522,6 +456,8 @@ void Hanrdware_Init(void)
 	my_mem_init(SRAMIN);		//初始化内部内存池
 	
 
+	
+
 }
 
 
@@ -562,25 +498,13 @@ void HardWare_Check(void)
 	}
 	else
 	{
-		if(1 == exfuns_init())							//为fatfs相关变量申请内存		
+		if(1 == exfuns_init(EX_FLASH))							//为fatfs相关变量申请内存		
 		{
 			DEBUG_Printf("fatfs Disk malloc false!");
 			while(1);
 		}			
 //  	f_mount(fs[0],"0:",1); 					//挂载SD卡 
- 	  res = f_mount(exfuns_GetfsArea(EX_FLASH),"1:",1); 				//挂载FLASH.	
-//		if(FR_OK != res)//FLASH磁盘,FAT文件系统错误,重新格式化FLASH
-//	  {
-//		  DEBUG_Printf("Flash Disk Formatting...");	//格式化FLASH
-//		  res=f_mkfs("1:",1,4096);//格式化FLASH,1,盘符;1,不需要引导区,8个扇区为1个簇
-//		  if(res==0)
-//		  {
-//			  f_setlabel((const TCHAR *)"1:test.data");	//设置Flash磁盘的名字为：test.data
-//			  DEBUG_Printf("Flash Disk Format Finish");	//格式化完成
-//		  }
-//			else 
-//				DEBUG_Printf("Flash Disk Format Error ");	//格式化失败
-//	  }			
+ 	  res = f_mount(exfuns_GetfsArea(EX_FLASH),"1:",1); 				//挂载FLASH.		
 		
 		FIL* file=(FIL*)mymalloc(SRAMIN,sizeof(FIL));		//为file申请内存
 		if(NULL == file)
@@ -602,7 +526,7 @@ void HardWare_Check(void)
 		myfree(SRAMIN,file);//释放内存
 		
 		OSTimeDlyHMSM(0,0,1,0,OS_OPT_TIME_HMSM_STRICT,&err); //延时1s
-	}
+	}		
 	
 	
 }
@@ -715,7 +639,25 @@ void start_task(void *p_arg)
                  (OS_TICK	  )0,					
                  (void   	* )0,				
                  (OS_OPT      )OS_OPT_TASK_STK_CHK|OS_OPT_TASK_STK_CLR, 
-                 (OS_ERR 	* )&err);											 
+                 (OS_ERR 	* )&err);			
+								 
+#ifdef USB_HOST_SUPPORT
+	//U盘host任务
+	OSTaskCreate((OS_TCB 	* )&USBHostTaskTCB,		
+				 (CPU_CHAR	* )"USBHost test task", 		
+                 (OS_TASK_PTR )USBHost_task, 			
+                 (void		* )0,					
+                 (OS_PRIO	  )USBHost_TASK_PRIO,     	
+                 (CPU_STK   * )&USBHost_TASK_STK[0],	
+                 (CPU_STK_SIZE)USBHost_STK_SIZE/10,	
+                 (CPU_STK_SIZE)USBHost_STK_SIZE,		
+                 (OS_MSG_QTY  )0,					
+                 (OS_TICK	  )0,					
+                 (void   	* )0,				
+                 (OS_OPT      )OS_OPT_TASK_STK_CHK|OS_OPT_TASK_STK_CLR, 
+                 (OS_ERR 	* )&err);			
+#endif
+								 
 	OS_CRITICAL_EXIT();	//退出临界区
 	
 								 

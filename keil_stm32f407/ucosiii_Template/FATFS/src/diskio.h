@@ -14,6 +14,7 @@ extern "C" {
 
 //#define SD_CARD	 0  //SD卡,卷标为0
 #define EX_FLASH 1	//外部flash,卷标为1
+#define USB_DISK 2	//U盘,卷标为2
 
 #include "integer.h"
 
