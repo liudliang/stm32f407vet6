@@ -1,0 +1,114 @@
+---- 报文 Matches (130 in 19 files) ----
+Adebug.c (project\jdqoutput\app):	/*校验报文*/
+Bms.c (project\jdqoutput\bms):	/* 充电机在充电阶段所发送的充电机充电状态报文CCS的字节长度为8，
+Bms.c (project\jdqoutput\bms):	   不符合GBT 34658-2017中DP.3001项中关于CCS报文字节长度应为7的要求，因此应将CCS的第8个字节内容删除 */
+Bms.c (project\jdqoutput\bms):		/* 标准规定充电机充电状态报文CCS的第5，6字节为累计充电时间，数据分辨率为1分钟每位 */
+Bms.c (project\jdqoutput\bms):		/* 当充电机在充电阶段收到BSM报文中电池状态一切正常，但充电请求为禁止充电 */
+Bms.c (project\jdqoutput\bms):/*BMS需求报文*/
+Bms.c (project\jdqoutput\bms):	//很多车厂BCP报文的最高允许充电电流是不做逻辑判断的，故下面的if语句注释了，改成取需求电流和最高允许充电电流的最小值-20190620 
+Bms.c (project\jdqoutput\bms):	/* (GBT 34658-2017中DN.3001项)标准规定充电机充电状态报文CCS的起始发送条件为收到BCL和BCS报文。
+Bms.c (project\jdqoutput\bms):		 此项中当充电机在发送CRO(AA)报文期间只收到了BCL报文，未收到BCS报文时，充电机回复了CCS报文，因此不正确
+Bms.c (project\jdqoutput\bms):	/* (GBT 34658-2017中DN.3002项)标准规定充电机充电状态报文CCS的起始发送条件为收到BCL和BCS报文。
+Bms.c (project\jdqoutput\bms):		 此项中当充电机在发送CRO(AA)报文期间只收到了BCS报文，未收到BCL报文时，充电机回复了CCS报文，因此不正确
+Bms.c (project\jdqoutput\bms):	/* 标准关于CRO(AA)报文中止发送条件以及CCS报文起始发送条件均为收到BCL和BCS报文 */
+Bms.c (project\jdqoutput\bms):	/* 标准关于CRO(AA)报文中止发送条件以及CCS报文起始发送条件均为收到BCL和BCS报文 */
+Bms.c (project\jdqoutput\bms):	/*暂时不处理该报文*/
+Bms.c (project\jdqoutput\bms):	/*暂时不处理该报文*/
+Bms.c (project\jdqoutput\bms):	/*暂时不处理该报文*/
+Bms.c (project\jdqoutput\bms):	/* 标准规定充电机充电状态报文CCS的中止发送条件为收到BST报文 */
+Bms.c (project\jdqoutput\bms):	/* 当BMS在充电阶段主动中止充电发送BST报文时，充电机在收到BST报文后所回复的充电机中止充电报文CST的数据域内容为00 00 F0 F0，
+Bms.c (project\jdqoutput\bms):	此内容未能表明中止充电原因，因此应修改为40 00 F0 F0，表示因收到BST报文中止充电 */
+Bms.c (project\jdqoutput\bms):				DebugInfoByBms("接收CRM 0X00充电机辨识报文超时");
+Bms.c (project\jdqoutput\bms):				DebugInfoByBms("接收CRM 0XAA充电机辨识报文超时");
+Bms.c (project\jdqoutput\bms):				DebugInfoByBms("接收充电机CML时间同步和最大能力报文超时");
+Bms.c (project\jdqoutput\bms):				DebugInfoByBms("接收充电机CRO完成充电准备报文超时");
+Bms.c (project\jdqoutput\bms):				DebugInfoByBms("接收充电机CCS充电状态报文超时");
+Bms.c (project\jdqoutput\bms):				DebugInfoByBms("接收充电机CST中止报文超时");
+Bms.c (project\jdqoutput\bms):				DebugInfoByBms("接收充电机CSD统计报文超时");
+Bms.h (project\jdqoutput\bms):			 uint32 carvolterr  : 1;  /*15 与报文电池电压偏差 <±5%*/
+Bms.h (project\jdqoutput\bms)://	CARVOL_ERR   = 0x23, /*与报文电池电压偏差 <±5%*/
+Can.c (project\driver\can):		if ((dummy & 0x80) == 0x80)  //报文错误中断标志位
+Che_Dian.c (project\jdqoutput\backproto):	/*校验报文*/
+Che_Dian.c (project\jdqoutput\backproto):发送启动 停止响应报文
+GbtBmsProto.c (project\jdqoutput\bms):/*单条报文发送 设置SPN的值*/
+GbtBmsProto.c (project\jdqoutput\bms):/*报文周期发送*/
+GbtBmsProto.c (project\jdqoutput\bms):/*报文发送周期关闭 fg=1 立即启动第一包发送*/
+GbtBmsProto.c (project\jdqoutput\bms):/* 所有报文发送周期关闭 */
+GbtBmsProto.c (project\jdqoutput\bms):		/* 标准规定充电机应对所收到的所有报文的ID（包括数据页，保留位，PGN，源地址，目的地址等）是否正确进行判断。
+GbtBmsProto.c (project\jdqoutput\bms):		充电机在收到保留位错误（R=1）的BRO(AA)报文时，将其当成了正确的BRO(AA)报文，回复了CRO报文，因此不正确 */
+GbtBmsProto.c (project\jdqoutput\bms):		/* 标准规定充电机应对所收到的所有报文的ID（包括数据页，保留位，PGN，源地址，目的地址等）是否正确进行判断。
+GbtBmsProto.c (project\jdqoutput\bms):		此测试项中充电机在收到数据页错误（DP=1）的BRO(AA)报文时，将其当成了正确的BRO(AA)报文，回复了CRO报文，因此不正确 */
+GbtBmsProto.c (project\jdqoutput\bms):		/* 当BMS向充电机发送的辨识报文BRM中的连接请求中的PGN的高字节或低字节错误（如 00 02 01）时，充电机将其当成了正确的BRM报文，
+GbtBmsProto.c (project\jdqoutput\bms):		在使用传输协议功能正常接收后回复了CRM(AA)报文，因此不符合要求 */
+GbtBmsProto.h (project\jdqoutput\bms):		uint32 PF:8;/* 报文类型 */
+GbtBmsProto.h (project\jdqoutput\bms):/*报文接收处理函数*/
+GbtBmsProto.h (project\jdqoutput\bms):/*周期报文发送函数*/
+GbtBmsProto.h (project\jdqoutput\bms):/*单条报文发送函数*/
+GbtBmsProto.h (project\jdqoutput\bms):/*周期报文发送控制*/
+GbtBmsProto.h (project\jdqoutput\bms):/* 所有报文发送周期关闭 */
+Hmi_Api.c (project\jdqoutput\screen):** 功能描述：打包写屏寄存器的报文
+Hmi_Api.c (project\jdqoutput\screen):** 功能描述：打包请求寄存器命令报文
+Hmi_Api.c (project\jdqoutput\screen):	/*校验报文*/
+Hmi_Api.h (project\jdqoutput\screen):/*打包请求触摸屏寄存器报文*/
+Hmi_Api.h (project\jdqoutput\screen):/*打包清除触摸屏寄存器报文*/
+Hmi_Api.h (project\jdqoutput\screen):/*触摸屏返回报文检测*/
+Hmi_Api.h (project\jdqoutput\screen):/*打包写触摸屏寄存器报文*/
+Hmi_page.c (project\jdqoutput\screen):	/*校验报文*/
+MainCtrlUnit.c (project\jdqoutput\app):	/* 当累计充电时间超过1分钟，输出电量超过0.1kwh时，充电机所发送的统计数据报文CSD中关于累计充电时间和输出电量的字节内容均为0，因此不正确 */
+MainCtrlUnit.c (project\jdqoutput\app):		 /* 充电机在充电阶段按下急停按钮后，所发送的充电机中止充电报文CST的内容为00 00 F0 F0，未标明中止原因，因此应修改为10 00 F1 F0，表示中止原因为充电机急停 */
+MainCtrlUnit.c (project\jdqoutput\app):		 /* 充电机在充电阶段按下急停按钮后，所发送的充电机中止充电报文CST的内容为00 00 F0 F0，未标明中止原因，因此应修改为10 00 F1 F0，表示中止原因为充电机急停 */
+MainCtrlUnit.c (project\jdqoutput\app):			 break; /*收到BRO报文完成跳转 SET_WORKSTEP(STEP_BRO_SUB);*/
+MainCtrlUnit.c (project\jdqoutput\app):						/*【车辆侧电压与报文不一致大于±5%】*/
+PutianBms.c (project\jdqoutput\bms):/*BMS需求报文*/
+PutianBms.h (project\jdqoutput\bms):/*单条报文发送 设置SPN的值*/
+PutianBms.h (project\jdqoutput\bms):/*报文周期发送*/
+PutianBms.h (project\jdqoutput\bms):/*报文发送周期关闭*/
+PutianBms.h (project\jdqoutput\bms):/* 所有报文发送周期关闭 */
+PutianBmsProto.c (project\jdqoutput\bms):/*单条报文发送 设置SPN的值*/
+PutianBmsProto.c (project\jdqoutput\bms):/* 所有报文发送周期关闭 */
+PutianBmsProto.c (project\jdqoutput\bms):/*报文周期发送*/
+PutianBmsProto.c (project\jdqoutput\bms):/*报文发送周期关闭*/
+Rf_Card.c (project\jdqoutput\app):/* 校验报文并且发送数据 */
+TaskMainCtrl.h (project\jdqoutput\app):	CARVOL_ERR   = 0x23, /*与报文电池电压偏差 <±5%*/
+TaskRealCheck.c (project\jdqoutput\app):/*检测车辆电压是否与报文相差 <±5%*/
+TaskRealCheck.h (project\jdqoutput\app):	ECODE15_PKGVOLT= 15,    	/*报文电压不匹配*/
+TaskRealCheck.h (project\jdqoutput\app):	ECODE50_BMSFINISH = 50,   /*收到BMS停止报文,达到SOC设定值*/ 
+TaskRealCheck.h (project\jdqoutput\app):	ECODE51_BMSTVOLT=51,      /*收到BMS停止报文,达到总电压设定值*/   
+TaskRealCheck.h (project\jdqoutput\app):	ECODE52_BMSSVOLT=52,      /*收到BMS停止报文,达到单体电压设定值*/ 
+TaskRealCheck.h (project\jdqoutput\app):	ECODE53_BMSCST  =53,      /*收到BMS停止报文,充电机主动终止*/ 
+TaskRealCheck.h (project\jdqoutput\app):	ECODE55_BMSISO  = 55,      /*收到BMS绝缘故障报文*/ 
+TaskRealCheck.h (project\jdqoutput\app):	ECODE67_BMSCRMTM  = 67,    /*BMS接收充电机CRM 00报文超时*/
+TaskRealCheck.h (project\jdqoutput\app):	ECODE68_BMSCRMATM = 68,    /*BMS接收充电机CRM AA报文超时*/
+TaskRealCheck.h (project\jdqoutput\app):	ECODE69_BMSCTSTM  = 69,    /*BMS接收充电机CTS和CML报文超时*/
+TaskRealCheck.h (project\jdqoutput\app):	ECODE70_BMSCROTM  = 70,    /*BMS接收充电机CRO报文超时*/
+TaskRealCheck.h (project\jdqoutput\app):	ECODE71_BMSCCSTM  = 71,    /*BMS接收充电机CCS报文超时*/
+TaskRealCheck.h (project\jdqoutput\app):	ECODE72_BMSCSTTM  = 72,    /*BMS接收充电机CST报文超时*/
+TaskRealCheck.h (project\jdqoutput\app):	ECODE73_BMSCSDTM  = 73,    /*BMS接收充电机CSD报文超时*/
+TaskRealCheck.h (project\jdqoutput\app):	ECODE83_CHGBST    = 83,    /*收到BMS中止报文停止*/
+TaskRealCheck.h (project\jdqoutput\app):	ECODE108_BCPOVERVOLT = 108, /*充电电压超过BCP报文最高允许值*/
+TaskRealCheck.h (project\jdqoutput\app):/*检测车辆电压是否与报文相差 <±5%*/
+TaskScreen.c (project\jdqoutput\screen):	{ECODE15_PKGVOLT,         "与报文电压偏差大于±5%"},
+TaskScreen.c (project\jdqoutput\screen):	{ECODE50_BMSFINISH,       "收到BMS停止报文,达到SOC设定值"},
+TaskScreen.c (project\jdqoutput\screen):	{ECODE51_BMSTVOLT,        "收到BMS停止报文,达到总电压设定值"},
+TaskScreen.c (project\jdqoutput\screen):	{ECODE52_BMSSVOLT,        "收到BMS停止报文,达到单体电压设定值"},
+TaskScreen.c (project\jdqoutput\screen):	{ECODE53_BMSCST,          "收到BMS停止报文,充电机主动终止"},
+TaskScreen.c (project\jdqoutput\screen):	{ECODE55_BMSISO,          "收到BMS绝缘故障报文"},
+TaskScreen.c (project\jdqoutput\screen):	{ECODE67_BMSCRMTM,        "BMS接收充电机CRM 00报文超时"},
+TaskScreen.c (project\jdqoutput\screen):	{ECODE68_BMSCRMATM,       "BMS接收充电机CRM AA报文超时"},
+TaskScreen.c (project\jdqoutput\screen):	{ECODE69_BMSCTSTM,        "BMS接收充电机CTS和CML报文超时"},
+TaskScreen.c (project\jdqoutput\screen):	{ECODE70_BMSCROTM,        "BMS接收充电机CRO报文超时"},
+TaskScreen.c (project\jdqoutput\screen):	{ECODE71_BMSCCSTM,        "BMS接收充电机CCS报文超时"},
+TaskScreen.c (project\jdqoutput\screen):	{ECODE72_BMSCSTTM,        "BMS接收充电机CST报文超时"},
+TaskScreen.c (project\jdqoutput\screen):	{ECODE73_BMSCSDTM,        "BMS接收充电机CSD报文超时"},
+TaskScreen.c (project\jdqoutput\screen):	{ECODE83_CHGBST,          "收到BMS中止报文停止"},
+TaskScreen.c (project\jdqoutput\screen):	{ECODE108_BCPOVERVOLT,"充电电压超过BCP报文最高允许值"},
+TaskScreen.c (project\jdqoutput\screen):	/*校验报文*/
+TaskScreen.c (project\jdqoutput\screen):	/*校验报文*/
+TaskScreen.c (project\jdqoutput\screen):	"等待BHM报文...",
+TaskScreen.c (project\jdqoutput\screen):	"等待接收BRM报文...",
+TaskScreen.c (project\jdqoutput\screen):	"等待接收BCP报文...",
+TaskScreen.c (project\jdqoutput\screen):	"等待接收BRO报文...",
+TaskScreen.c (project\jdqoutput\screen):								 case E12_CHKPARA: //等待接收BRO报文...
+---- 报文 Search Errors Encountered (1) ----
+The following 1 files could not be processed:
+D:\lhh\dyy\CCjk405\Project\jdqoutput\RVMDK\JLinkLog.txt : File could not be opened.

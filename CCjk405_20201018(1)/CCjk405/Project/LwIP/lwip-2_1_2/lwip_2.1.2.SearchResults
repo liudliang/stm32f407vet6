@@ -1,0 +1,6 @@
+---- DNS_SERVER_ADDRESS Matches (5 in 2 files) ----
+Dns.c (src\core): * (if DNS_SERVER_ADDRESS is set).
+Dns.c (src\core):#ifdef DNS_SERVER_ADDRESS
+Dns.c (src\core):  DNS_SERVER_ADDRESS(&dnsserver);
+Dns.c (src\core):#endif /* DNS_SERVER_ADDRESS */
+Opt.h (src\include\lwip): * DNS_SERVER_ADDRESS(ipaddr), where 'ipaddr' is an 'ip_addr_t*'
