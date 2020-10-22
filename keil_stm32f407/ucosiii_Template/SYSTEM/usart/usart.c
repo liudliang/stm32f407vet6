@@ -19,7 +19,7 @@ STM32F10x_UART_CHAN UARTChan[N_UART_CHANNELS];
 
 
 
-#if 1
+#if 0
 //加入以下代码,支持printf函数,而不需要选择use MicroLIB	  
 #pragma import(__use_no_semihosting)             
 //标准库需要的支持函数                 
@@ -1163,6 +1163,10 @@ static void UartDevInit(STM32F10x_UART_CHAN* pChan)
 		USART_ITConfig(USART1, USART_IT_RXNE, ENABLE);	         // 允许的中断类型-接收缓冲区收到数据 
 				  		
 		USART_Cmd(USART1, ENABLE);	                             // USART使能 USART_CR1 bit13
+		
+		/* CPU的小缺陷：串口配置好，如果直接Send，则第1个字节发送不出去
+		如下语句解决第1个字节无法正确发送出去的问题 */
+	  USART_ClearFlag(USART1, USART_FLAG_TC);     /* 清发送完成标志，Transmission Complete flag */
 	}
 	else if(pbase == (USART_TypeDef*)USART2_BASE)
 	{

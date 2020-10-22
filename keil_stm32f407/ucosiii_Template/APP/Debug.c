@@ -176,30 +176,7 @@ static void debug_tcp_client_thread(void)
 	
 	
 	
-	
-	
-	
-	
-	
-	
-	
-//	while(1)
-//	{
-//	
-//	  if(1 == DP83848_GetPHYlinkStatus())
-//	  {
-//		  if(2 != lwipdev.dhcpstatus)	//DHCP³É¹¦
-//			{
-//				OSTimeDlyHMSM(0,0,2,0,OS_OPT_TIME_HMSM_STRICT,&err); 
-//			}
-//			else
-//			{
-//				
-//			}
-//	  }
-//		OSTimeDlyHMSM(0,0,2,0,OS_OPT_TIME_HMSM_STRICT,&err);
-//		
-//	}
+
 	
 	
 }

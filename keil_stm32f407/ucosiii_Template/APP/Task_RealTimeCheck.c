@@ -99,7 +99,7 @@ void Check_DevStatus(void)
 
 
 
-//TaskStackUsage任务函数
+//RealTimeCheck任务函数
 void RealTimeCheck_task(void *p_arg)
 {
 	OS_ERR err;
@@ -112,7 +112,7 @@ void RealTimeCheck_task(void *p_arg)
 		Check_TranIOStatus();
 		Check_DevStatus();
 		
-		OSTimeDlyHMSM(0,0,0,50,OS_OPT_TIME_HMSM_STRICT,&err); //延时100ms
+		OSTimeDlyHMSM(0,0,0,50,OS_OPT_TIME_HMSM_STRICT,&err); //延时50ms
 	}
 }
 

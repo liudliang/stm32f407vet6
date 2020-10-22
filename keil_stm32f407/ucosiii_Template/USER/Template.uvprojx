@@ -335,9 +335,9 @@
             <v6Rtti>0</v6Rtti>
             <VariousControls>
               <MiscControls></MiscControls>
-              <Define>STM32F40_41xxx,USE_STDPERIPH_DRIVER,__FPU_USED=1</Define>
+              <Define>STM32F40_41xxx,USE_STDPERIPH_DRIVER,__FPU_USED=1,USE_USB_OTG_FS</Define>
               <Undefine></Undefine>
-              <IncludePath>..\CORE;..\SYSTEM\delay;..\SYSTEM\sys;..\SYSTEM\usart;..\UCOSIII\uC-LIB;..\UCOSIII\uC-CPU;..\UCOSIII\uCOS-III;..\UCOSIII\UCOS_BSP;..\UCOSIII\UCOS_CONFIG;..\UCOSIII\uCOS-III\Source;..\UCOSIII\uC-CPU\ARM-Cortex-M4\RealView;..\UCOSIII\uC-LIB\Ports\ARM-Cortex-M4\RealView;..\UCOSIII\uCOS-III\Ports\ARM-Cortex-M4\Generic\RealView;..\APP;..\HARDWARE\DMA;..\HARDWARE\IWDG;..\HARDWARE\TIMER;..\HARDWARE\GPIO;..\APP\common;..\APP\queue;..\HARDWARE\RTC;..\HARDWARE\IIC;..\HARDWARE\24CXX;..\HARDWARE\DS18B20;..\HARDWARE\SPI;..\HARDWARE\W25QXX;..\HARDWARE\SRAM;..\APP\malloc;..\FWLIB\STM32F4xx_StdPeriph_Driver\inc;..\FWLIB\STM32F4x7_ETH_Driver\inc;..\LWIP\lwip-1.4.1\src\include\netif;..\LWIP\lwip_app\lwip_comm;..\HARDWARE\ETHERNET;..\LWIP\lwip-1.4.1\src\include;..\LWIP;..\LWIP\lwip-1.4.1\src\include\ipv4;..\LWIP\arch;..\LWIP\lwip_app\tcp_client_demo</IncludePath>
+              <IncludePath>..\CORE;..\SYSTEM\delay;..\SYSTEM\sys;..\SYSTEM\usart;..\UCOSIII\uC-LIB;..\UCOSIII\uC-CPU;..\UCOSIII\uCOS-III;..\UCOSIII\UCOS_BSP;..\UCOSIII\UCOS_CONFIG;..\UCOSIII\uCOS-III\Source;..\UCOSIII\uC-CPU\ARM-Cortex-M4\RealView;..\UCOSIII\uC-LIB\Ports\ARM-Cortex-M4\RealView;..\UCOSIII\uCOS-III\Ports\ARM-Cortex-M4\Generic\RealView;..\APP;..\HARDWARE\DMA;..\HARDWARE\IWDG;..\HARDWARE\TIMER;..\HARDWARE\GPIO;..\APP\common;..\APP\queue;..\HARDWARE\RTC;..\HARDWARE\IIC;..\HARDWARE\24CXX;..\HARDWARE\DS18B20;..\HARDWARE\SPI;..\HARDWARE\W25QXX;..\HARDWARE\SRAM;..\APP\malloc;..\FWLIB\STM32F4xx_StdPeriph_Driver\inc;..\FWLIB\STM32F4x7_ETH_Driver\inc;..\LWIP\lwip-1.4.1\src\include\netif;..\LWIP\lwip_app\lwip_comm;..\HARDWARE\ETHERNET;..\LWIP\lwip-1.4.1\src\include;..\LWIP;..\LWIP\lwip-1.4.1\src\include\ipv4;..\LWIP\arch;..\LWIP\lwip_app\tcp_client_demo;..\LWIP\lwip_app\ftp_client;..\FATFS;..\FWLIB\STM32_USB_OTG_Driver\inc;..\FWLIB\STM32_USB_HOST_Library\Core\inc;..\FWLIB\STM32_USB_HOST_Library\Class\MSC\inc;..\HARDWARE\USB_APP</IncludePath>
             </VariousControls>
           </Cads>
           <Aads>
@@ -590,6 +590,11 @@
               <FileName>usart.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\SYSTEM\usart\usart.c</FilePath>
+            </File>
+            <File>
+              <FileName>retarget.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\SYSTEM\usart\retarget.c</FilePath>
             </File>
           </Files>
         </Group>
@@ -1273,6 +1278,111 @@
               <FileType>1</FileType>
               <FilePath>..\LWIP\lwip_app\tcp_client_demo\tcp_client_demo.c</FilePath>
             </File>
+            <File>
+              <FileName>lwftp.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\LWIP\lwip_app\ftp_client\lwftp.c</FilePath>
+            </File>
+          </Files>
+        </Group>
+        <Group>
+          <GroupName>FATFS</GroupName>
+          <Files>
+            <File>
+              <FileName>diskio.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\FATFS\src\diskio.c</FilePath>
+            </File>
+            <File>
+              <FileName>ff.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\FATFS\src\ff.c</FilePath>
+            </File>
+            <File>
+              <FileName>exfuns.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\FATFS\exfuns\exfuns.c</FilePath>
+            </File>
+            <File>
+              <FileName>cc936.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\FATFS\src\option\cc936.c</FilePath>
+            </File>
+            <File>
+              <FileName>ff_Lock.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\FATFS\exfuns\ff_Lock.c</FilePath>
+            </File>
+          </Files>
+        </Group>
+        <Group>
+          <GroupName>USB_APP</GroupName>
+          <Files>
+            <File>
+              <FileName>usb_bsp.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\HARDWARE\USB_APP\usb_bsp.c</FilePath>
+            </File>
+            <File>
+              <FileName>usbh_usr.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\HARDWARE\USB_APP\usbh_usr.c</FilePath>
+            </File>
+          </Files>
+        </Group>
+        <Group>
+          <GroupName>USB_HOST</GroupName>
+          <Files>
+            <File>
+              <FileName>usbh_core.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\FWLIB\STM32_USB_HOST_Library\Core\src\usbh_core.c</FilePath>
+            </File>
+            <File>
+              <FileName>usbh_hcs.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\FWLIB\STM32_USB_HOST_Library\Core\src\usbh_hcs.c</FilePath>
+            </File>
+            <File>
+              <FileName>usbh_ioreq.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\FWLIB\STM32_USB_HOST_Library\Core\src\usbh_ioreq.c</FilePath>
+            </File>
+            <File>
+              <FileName>usbh_stdreq.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\FWLIB\STM32_USB_HOST_Library\Core\src\usbh_stdreq.c</FilePath>
+            </File>
+            <File>
+              <FileName>usbh_msc_bot.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\FWLIB\STM32_USB_HOST_Library\Class\MSC\src\usbh_msc_bot.c</FilePath>
+            </File>
+            <File>
+              <FileName>usbh_msc_core.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\FWLIB\STM32_USB_HOST_Library\Class\MSC\src\usbh_msc_core.c</FilePath>
+            </File>
+            <File>
+              <FileName>usbh_msc_scsi.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\FWLIB\STM32_USB_HOST_Library\Class\MSC\src\usbh_msc_scsi.c</FilePath>
+            </File>
+            <File>
+              <FileName>usb_core.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\FWLIB\STM32_USB_OTG_Driver\src\usb_core.c</FilePath>
+            </File>
+            <File>
+              <FileName>usb_hcd.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\FWLIB\STM32_USB_OTG_Driver\src\usb_hcd.c</FilePath>
+            </File>
+            <File>
+              <FileName>usb_hcd_int.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\FWLIB\STM32_USB_OTG_Driver\src\usb_hcd_int.c</FilePath>
+            </File>
           </Files>
         </Group>
       </Groups>
@@ -1282,7 +1392,14 @@
   <RTE>
     <apis/>
     <components/>
-    <files/>
+    <files>
+      <file attr="config" category="source" name="Network\Config\Net_Config_FTP_Client.h" version="5.0.0">
+        <instance index="0" removed="1">RTE\Network\Net_Config_FTP_Client.h</instance>
+        <component Cbundle="MDK-Plus" Cclass="Network" Cgroup="Service" Csub="FTP Client" Cvendor="Keil" Cversion="7.8.0" condition="Network TCP and File System Drive"/>
+        <package name="MDK-Middleware" schemaVersion="1.4" url="http://www.keil.com/pack/" vendor="Keil" version="7.6.0"/>
+        <targetInfos/>
+      </file>
+    </files>
   </RTE>
 
 </Project>
