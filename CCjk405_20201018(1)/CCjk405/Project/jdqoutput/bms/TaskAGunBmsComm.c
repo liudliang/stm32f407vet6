@@ -122,7 +122,8 @@ void TaskAGunBmsComm(void *p_arg)
 	PDU_HEAD_STRUCT *ptrPF = NULL;	
 	
 	errCnt = 0;
-
+	
+	Delay10Ms(300);  //20201115addzyf
 	TaskGunInit(AGUN_NO);
 //	TaskGunInit(BGUN_NO);
 

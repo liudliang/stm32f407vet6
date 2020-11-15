@@ -7,6 +7,8 @@
 #include "gpio.h"
 #include "MCP2515.h"
 #include "Adebug.h"
+#include "ChgData.h"
+#include "TaskBackComm.h"
 
 #define CAN3                ((CAN_TypeDef *)0x00000003)
 
@@ -27,6 +29,9 @@ int32 CanHander[CAN_DEVICE_NUMS] = { 0 };
 
 #define BMS1_CANID  0x000056F4
 #define BMS1_MASKID 0x0000FFFF
+
+#define HELI_BMS1_CANID  0x180000F4      //ºÏÁ¦
+#define HELI_BMS1_MASKID 0xFF0000FF
 
 #define BMS2_CANID  0x06000003
 #define BMS2_MASKID 0x1FF00007
@@ -267,6 +272,8 @@ RETURN: device dirscription if successful,or 0
 *************************************************/
 int32 Can_Open(uint32 deviceId)
 {
+	PARAM_COMM_TYPE *BackCOMM = ChgData_GetCommParaPtr();
+	
 	switch(deviceId)
 	{
 		case CAN_1:
@@ -276,9 +283,17 @@ int32 Can_Open(uint32 deviceId)
 				CANChan[deviceId].devicType      = CANParameter[deviceId].devicType;
 				CANChan[deviceId].frameType      = CAN_FRAME_EXTERNED;
 				CANChan[deviceId].baudRate       = CANParameter[deviceId].defBuardRate;
-				CANChan[deviceId].base           = CANParameter[deviceId].base;  
-				CANChan[deviceId].canID          = BMS1_CANID;  
-				CANChan[deviceId].canMaskId      = BMS1_MASKID;     
+				CANChan[deviceId].base           = CANParameter[deviceId].base; 
+				if(BMS_HELI == BackCOMM->agreetype)
+				{		
+					CANChan[deviceId].canID          = HELI_BMS1_CANID;  
+					CANChan[deviceId].canMaskId      = HELI_BMS1_MASKID; 
+				}
+				else
+				{
+					CANChan[deviceId].canID          = BMS1_CANID;  
+					CANChan[deviceId].canMaskId      = BMS1_MASKID; 
+				}					
 				
 				QueueCreate(CANChan[deviceId].rcvBuf,  MAX_CAN_RCV_BUF_LENTH,  sizeof(CAN_MSG), 0, 0);
 				QueueCreate(CANChan[deviceId].sendBuf, MAX_CAN_SEND_BUF_LENTH, sizeof(CAN_MSG), 0, 0);

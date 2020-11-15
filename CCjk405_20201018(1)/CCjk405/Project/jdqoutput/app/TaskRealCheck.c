@@ -806,7 +806,7 @@ void Check_TranIOStatus(void)
 	pInputDataptr->statu.bits.stop    = ~gInputStu.bits.bit0&0x01 ;  			/*急停*/
 	pInputDataptr->statu.bits.ackm    = gInputStu.bits.bit2;  		 	/*交流接触器*/
 	pInputDataptr->statu.bits.spd     = gInputStu.bits.bit3;   			/*防雷器*/
-	pGunDataPtr->statu.bits.elockstu  = ~gInputStu.bits.bit2&0x01; //~gInputStu.bits.bit9&0x01;  /*电子锁反馈 */
+	pGunDataPtr->statu.bits.elockstu  = gInputStu.bits.bit2&0x01; //~gInputStu.bits.bit9&0x01;  /*电子锁反馈 */
 	
 	pInputDataptr->statu.bits.acqf    = gInputStu.bits.bit1;   			/*交流断路器*/
 	pInputDataptr->statu.bits.posfuse = gInputStu.bits.bit7;   			/*正熔丝*/

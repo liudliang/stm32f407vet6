@@ -12,6 +12,7 @@ Version: v0.01
 #include "Adebug.h"
 #include "main.h"
 #include "gpio.h"
+#include "HeLiBmsProto.h"
 
 
 OS_EVENT *tm_bms_mutex;  //保护全局变量和流程
@@ -36,6 +37,8 @@ void Timer_BmsCricleReport(SEND_PROTO_ST *ptrList, uint8 gunNO)
 	GSEND_INFO ctrlinf ;
 	uint8 buf[50] = {0}, err;
 	SEND_PROTO_ST *pItem = NULL;
+	_t_heli_send_data_info heli_send_data_info;
+	PARAM_COMM_TYPE *BackCOMM = ChgData_GetCommParaPtr();
 	
 	//请求互斥量
 	
@@ -61,8 +64,19 @@ void Timer_BmsCricleReport(SEND_PROTO_ST *ptrList, uint8 gunNO)
 					ctrlinf.frmNum = 1;
 					len = pItem->pkg(buf,(void *)&ctrlinf,gunNO);
 					if(len > 0 ) {
-						ctrlinf.frmNum = (len / 8 ) + ((len % 8) > 0);
-						Gbt_SendData(&ctrlinf,buf,len);
+						if(BMS_HELI == BackCOMM->agreetype)
+						{
+							heli_bms_send_ccs(buf,&ctrlinf,gunNO);
+							heli_send_data_info.gunNo = gunNO;
+							heli_send_data_info.ID = 0x18ff50e5;
+							len = 8;
+							heli_bms_send_data(&heli_send_data_info,buf,len);
+						}
+						else
+						{
+							ctrlinf.frmNum = (len / 8 ) + ((len % 8) > 0);
+							Gbt_SendData(&ctrlinf,buf,len);
+						}
 					}
 				}
 			}
@@ -348,6 +362,9 @@ extern void SetCD4051BMTChannel(uint8 ch);
 void TIM5_IRQHandler(void)
 { 	
 //	CHG_DATA_ST *chg_ptr = (CHG_DATA_ST *)Bms_GetChgrDataPtr() ;
+	PARAM_COMM_TYPE *BackCOMM = ChgData_GetCommParaPtr();
+	SEND_PROTO_ST *ptrList = heli_get_proto_list();
+
 	OS_CPU_SR  cpu_sr;
 	OS_ENTER_CRITICAL();                                       // Tell uC/OS-II that we are starting an ISR
 	OSIntNesting++;
@@ -357,6 +374,13 @@ void TIM5_IRQHandler(void)
 	{
 		TIM_ClearITPendingBit(TIM5, TIM_IT_Update);	
 
+//-------------------	
+		//发送100MS的BMS帧
+		if(BMS_HELI == BackCOMM->agreetype)
+		{	
+			Timer_BmsCricleReport(ptrList,0);		
+		}	
+//-------------------			
 		
 #ifdef ETH_TEMP_TEST
 //	DebugInfoByBms("TIM5_IRQHandler....100MS...BMS TEST");

@@ -730,68 +730,84 @@ void ProcBRO(void *item,uint8 *data,uint8 GunNo)
 }
 
 
+#define MDSTEPCURRENT   300   //30A一次
 
+/* 本ProBmsStepAdjustCurr ProcBCL 函数为适应航叉BMS问题而修改，其需求的电压电流值有时会报异常值导致不能充电故障，修改后使协议流程通过 */
+/* 但是其值可能是错误的 */
+/* 2018年11月08日为适应杭叉的BMS问题修改，其BMS需求电压有时会超过BCP最大电压，故将判断条件去掉 */ 
+void ProBmsStepAdjustCurr(void)
+{
+ 	uint16 tmp16;
+ 	stoc_u tmp16su;
 
-//void ProBmsStepAdjustCurr(void)
-//{
-//	 uint16 tmp16;
-//	 stoc_u tmp16su;
+    static uint32 sStepTicks = 0;
+	 
+	static BCL_ST stmpbcl = {0,0,0,0,0,0};
+	uint8  msg[6] = {0};
+	PARAM_OPER_TYPE *ptrRunParam = ChgData_GetRunParamPtr();
+	uint8 tmpNum = ptrRunParam->modnum ;
+	BMSDATA_ST *ptr = (BMSDATA_ST *)Bms_GetBmsCarDataPtr(0) ;
+	CHARGE_TYPE *ptrRunData = ChgData_GetRunDataPtr(AGUN_NO);
+    tmp16 = abs(ptr->bcl.needcurr - ptrRunData->meter->current);
 
-//   static uint32 sStepTicks = 0;
-//	 
-//	 static BCL_ST stmpbcl = {0,0,0,0,0,0};
-//	 uint8  msg[6] = {0};
-//	 PARAM_OPER_TYPE *ptrRunParam = ChgData_GetRunParamPtr();
-//	 uint8 tmpNum = ptrRunParam->modnum ;
-//	 BMSDATA_ST *ptr = (BMSDATA_ST *)Bms_GetBmsCarDataPtr(0) ;
-//	 CHARGE_TYPE *ptrRunData = ChgData_GetRunDataPtr(AGUN_NO);
-//   tmp16 = abs(ptr->bcl.needcurr - ptrRunData->meter->current);
-
-//   if( (tmpNum == 0 ) || ( tmpNum > 20 )) { /*防止配置出错*/
-//		 tmpNum = 10;
-//	 }
-//	 
-//	 if( (stmpbcl.chgmode != ptr->bcl.chgmode) \
-//	 || (stmpbcl.needcurr != ptr->bcl.needcurr) \
-//	 || ((tmp16 > 50) && ( ptrRunData->meter->current < (tmpNum * ptrRunParam->singmodcurr)-20 ) ) \
-//	 || (stmpbcl.needvolt != ptr->bcl.needvolt) ) 
-//	 {
-//		  tmp16 = ptr->bcl.needcurr;
-//		  if( (GetSystemTick() - sStepTicks > 2 * TIM_1S) ){
-//				 sStepTicks = GetSystemTick();
-//				
-//			   if( tmp16 > gStepCurrent ) {
-//	           gStepCurrent = (gStepCurrent+200) < tmp16 ? (gStepCurrent+200) : tmp16;
-//				 }else if (200 < gStepCurrent) {
-//			      gStepCurrent = (gStepCurrent-200) > tmp16 ? gStepCurrent - 200 : tmp16;
-//			   }else {
-//					 gStepCurrent = tmp16;
-//				 }
-//				 if( (ptr->bcl.needvolt > ptr->bcp.chgmaxvolt) || (ptr->bcl.needvolt > (ptrRunParam->maxvolt+50 ))\
-//					 || ptr->bcl.needvolt < 100 ){ /*最高需求大于 > 755V 或者 < 10V 认为数据出错*/
+    if( (tmpNum == 0 ) || ( tmpNum > 20 )) { /*防止配置出错*/
+		 tmpNum = 10;
+	}
+	 
+	 if( (stmpbcl.chgmode != ptr->bcl.chgmode) \
+	 || (stmpbcl.needcurr != ptr->bcl.needcurr) \
+	 || ((tmp16 > 50) && ( ptrRunData->meter->current < (tmpNum * ptrRunParam->singmodcurr)-20 ) ) \
+	 || (stmpbcl.needvolt != ptr->bcl.needvolt) ) 
+	 {
+		 tmp16 = ptr->bcl.needcurr;
+		 if( (GetSystemTick() - sStepTicks > 2 * TIM_1S) )
+		 {
+			sStepTicks = GetSystemTick();
+				
+			if( tmp16 > gStepCurrent ) 
+			{
+	        	gStepCurrent = (gStepCurrent+MDSTEPCURRENT) < tmp16 ? (gStepCurrent+MDSTEPCURRENT) : tmp16;
+			}
+			else if (MDSTEPCURRENT < gStepCurrent) 
+			{
+				gStepCurrent = (gStepCurrent-MDSTEPCURRENT) > tmp16 ? gStepCurrent - MDSTEPCURRENT : tmp16;
+			}
+			else 
+			{
+				gStepCurrent = tmp16;
+			}
+//			if( (ptr->bcl.needvolt > ptr->bcp.chgmaxvolt) || (ptr->bcl.needvolt > (ptrRunParam->maxvolt+50 ))\
+//					 || ptr->bcl.needvolt < 100 )
+//			{ /*最高需求大于 > 755V 或者 < 10V 认为数据出错*/
 //					  return;
-//				 }
-//				 
-//				 tmp16su.s = ptr->bcl.needvolt-10;
-//				 msg[0] = 0; /*枪号，待改写*/
-//				 msg[1] = tmp16su.c[0];  
-//				 msg[2] = tmp16su.c[1];
-//				
-//				 tmp16su.s = gStepCurrent / tmpNum;
-//				 tmp16su.s = tmp16su.s > ptrRunParam->singmodcurr ? ptrRunParam->singmodcurr : tmp16su.s;
-//				 msg[3] = tmp16su.c[0];  
-//				 msg[4] = tmp16su.c[1];
-//				 msg[5] = ptr->bcl.chgmode;
-//				 SendMsgWithNByte(MSG_MOD_ADJUST,5,&msg[0],APP_TASK_DLMOD_PRIO);
-//				
-//				 stmpbcl.chgmode = ptr->bcl.chgmode;
-//				 stmpbcl.needcurr = gStepCurrent;
-//				 stmpbcl.needvolt = ptr->bcl.needvolt-5;  /*-0.5V*/
 //			}
-//	}else { /*需求电压、电流无需调整*/
-//		 sStepTicks = GetSystemTick();
-//	}	
-//}
+
+			if (ptr->bcl.needvolt > ptrRunParam->maxvolt || ptr->bcl.needvolt < ptrRunParam->minvolt) { 
+				return;
+			}
+			 
+			tmp16su.s = ptr->bcl.needvolt-10;
+			msg[0] = 0; /*枪号，待改写*/
+			msg[1] = tmp16su.c[0];  
+			msg[2] = tmp16su.c[1];
+			
+			tmp16su.s = gStepCurrent / tmpNum;
+			tmp16su.s = tmp16su.s > ptrRunParam->singmodcurr ? ptrRunParam->singmodcurr : tmp16su.s;
+			msg[3] = tmp16su.c[0];  
+			msg[4] = tmp16su.c[1];
+			msg[5] = ptr->bcl.chgmode;
+			SendMsgWithNByte(MSG_MOD_ADJUST,5,&msg[0],APP_TASK_DLMOD_PRIO);
+			
+			stmpbcl.chgmode = ptr->bcl.chgmode;
+			stmpbcl.needcurr = gStepCurrent;
+			stmpbcl.needvolt = ptr->bcl.needvolt-5;  /*-0.5V*/
+		}
+	}
+	else 
+	{ /*需求电压、电流无需调整*/
+		sStepTicks = GetSystemTick();
+	}	
+}
 
 /*BMS需求报文*/
 void ProcBCL(void *item,uint8 *data,uint8 gunNo)

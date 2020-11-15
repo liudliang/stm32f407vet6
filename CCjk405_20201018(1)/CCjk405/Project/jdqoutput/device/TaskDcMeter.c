@@ -17,7 +17,8 @@
 #include "ChgData.h"
 #include "wdg.h"
 #include "TaskAcMeter.h"
-
+#include "TaskBackComm.h"
+#include "HeLiBmsProto.h"
 
 #ifdef DC_MET_ON
 
@@ -282,11 +283,12 @@ void TaskDcMeter(void *p_arg)
 	
 	TskDc_InitData();
 #else
-	uint8 u8AdrSeq = 0;
+	uint8 u8AdrSeq = 0,cyclecnt = 0;
 	uint16 cnt[DEF_MAX_GUN_NO] = {0};
 	DEV_METER_TYPE *pMet = NULL;
 	uint8 gunno = AGUN_NO;
 	MSG_STRUCT msg;
+	PARAM_COMM_TYPE *BackCOMM = ChgData_GetCommParaPtr();
 
 	TskDcAc_InitData();   //从模块采集电压电流
 #ifdef DC_MET_ON
@@ -493,6 +495,12 @@ if( ReadAcMeterData() > 0) {
 		TaskRunTimePrint("TaskDcMeter end", OSPrioCur);
 
 //		 Wdg_feeddog();
+	if((BMS_HELI == BackCOMM->agreetype) && ((cyclecnt++) > 7))
+	{
+		cyclecnt = 0;
+		heli_polling();
+	}
+
 		Delay10Ms(APP_TASK_DCMETER_DELAY);
 
 

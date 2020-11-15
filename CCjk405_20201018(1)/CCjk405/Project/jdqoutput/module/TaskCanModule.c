@@ -419,6 +419,7 @@ void Task_CdModule(void *p_arg)
     uint8 rtn = 0, MODGatherCnt = 0;
 	  MSG_STRUCT msg;
     
+		Delay10Ms(300);  //20201115addzyf
 	  TskMod_InitCAN();
 
 	  m_gModAddr = 0;

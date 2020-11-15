@@ -15,6 +15,9 @@
 #include "bms.h"
 #include "ChgData.h"
 #include "Adebug.h"
+#include "TaskBackComm.h"
+#include "HeLiBmsProto.h"
+
 void Gbt_SendData(GSEND_INFO *sendinf,uint8 *pbuf,uint16 length);
 
 const RCV_PROTO_ST gRcvProtoList[] = \
@@ -338,36 +341,58 @@ SEND_PROTO_ST *ptrList = GetProtoListPtr(gunNo);
 /*报文周期发送*/
 uint8 Gbt_CricleReport(uint8 gunNo)
 {
-	 uint16 len = 0;
-	 uint16 i = 0;
-   GSEND_INFO ctrlinf ;
-	 uint8 buf[50] = {0};
-	 SEND_PROTO_ST *pItem = NULL;
-   SEND_PROTO_ST *ptrList = GetProtoListPtr(gunNo);
+	uint16 len = 0;
+	uint16 i = 0;
+    GSEND_INFO ctrlinf ;
+	uint8 buf[50] = {0};
+	SEND_PROTO_ST *pItem = NULL;
+	SEND_PROTO_ST *ptrList = GetProtoListPtr(gunNo);
+	PARAM_COMM_TYPE *BackCOMM = ChgData_GetCommParaPtr();
+	_t_heli_send_data_info heli_send_data_info;
 
-	 for(i = 0;ptrList[i].frmtype != 0xff; i++)  {
-		 if( ptrList[i].allowed == CRICLE_ALLOWED ) {
+	if(BMS_HELI == BackCOMM->agreetype)
+	{	
+		ptrList = heli_get_proto_list();
+	}
+	
+	for(i = 0;ptrList[i].frmtype != 0xff; i++)  
+	{
+		if( ptrList[i].allowed == CRICLE_ALLOWED ) 
+		{
 			 pItem = &ptrList[i];
-			 if(GetSystemTick()- pItem->currticks >= pItem->cricle) {
-				 if( NULL != pItem->pkg ) {
-					 memset(&ctrlinf,0,sizeof(GSEND_INFO));
-					 ctrlinf.gunNo = gunNo;
-					 ctrlinf.pf = pItem->pgn;
-					 ctrlinf.pri = pItem->prio;
-					 ctrlinf.srcAdr = CHARGER_ADDR;
-					 ctrlinf.objAdr = BMS_ADDR;
-					 ctrlinf.frmNum = 1;
-					 len = pItem->pkg(buf,(void *)&ctrlinf,gunNo);
-					 if(len > 0 ) {
-						  ctrlinf.frmNum = (len / 8 ) + ((len % 8) > 0);
+			 if(GetSystemTick()- pItem->currticks >= pItem->cricle)
+			 {
+				 if( NULL != pItem->pkg ) 
+				 {
+					memset(&ctrlinf,0,sizeof(GSEND_INFO));
+					ctrlinf.gunNo = gunNo;
+					ctrlinf.pf = pItem->pgn;
+					ctrlinf.pri = pItem->prio;
+					ctrlinf.srcAdr = CHARGER_ADDR;
+					ctrlinf.objAdr = BMS_ADDR;
+					ctrlinf.frmNum = 1;
+					len = pItem->pkg(buf,(void *)&ctrlinf,gunNo);
+					if(len > 0 ) 
+					{
+						ctrlinf.frmNum = (len / 8 ) + ((len % 8) > 0);
+						if(BMS_HELI == BackCOMM->agreetype)
+						{
+							heli_send_data_info.gunNo = gunNo;
+							heli_send_data_info.ID = 0x18ff50e5;
+							heli_send_data_info.pf = pItem->pgn;
+							heli_bms_send_data(&heli_send_data_info,buf,len);
+						}
+						else
+						{
 							Gbt_SendData(&ctrlinf,buf,len);
-						  pItem->currticks  =  GetSystemTick();
-              Delay5Ms(1);
-					 }
+						}
+						pItem->currticks  =  GetSystemTick();
+             			Delay5Ms(1);
+					}
 				 }
 			 }	 
-		 }
-	 }
+		}
+	}
 	 return 0;
 }
 
@@ -376,11 +401,27 @@ uint8 Gbt_CricleReport(uint8 gunNo)
 /*报文发送周期关闭 fg=1 立即启动第一包发送*/
 uint8 Gbt_CtrlCricle(uint8 gunNo,uint8 pf,uint8 allow,uint8 fg)
 {
-	  uint16 i = 0;  
+	  uint16 i = 0;
+	PARAM_COMM_TYPE *BackCOMM = ChgData_GetCommParaPtr();  
+	SEND_PROTO_ST *ptrList = heli_get_proto_list();
 		
 #ifdef BMS_USE_TIMER
 	if(gunNo == AGUN_NO)
 	{
+		
+//-------------------	
+		//发送100MS的BMS帧
+		if(BMS_HELI == BackCOMM->agreetype)
+		{	
+			for( i = 0 ;ptrList[i].frmtype != 0xff; i++)  {
+				 if( pf == ptrList[i].pgn ) {
+					ptrList[i].allowed = allow;
+					break;
+				 }
+			}	
+		}	
+//-------------------			
+		
 	 	for( i = 0 ;gChgProtoListA_500ms[i].frmtype != 0xff; i++)  {
 		   if( pf == gChgProtoListA_500ms[i].pgn ) {
 				gChgProtoListA_500ms[i].allowed = allow;
@@ -567,11 +608,18 @@ uint8 Gbt_RcvDealFrame(uint8 GunNo,void *rtninfo,uint8 *pbuf)
 	uint8 sbuf[20] = {0};
   PDU_HEAD_STRUCT *ptrPF = NULL;
   const RCV_PROTO_ST *ptrItem1 = NULL;
+  PARAM_COMM_TYPE *BackCOMM = ChgData_GetCommParaPtr();
 	
   memset(&Canmsg,0,sizeof(CAN_MSG));
 
 	if(Bms_CanRead(&Canmsg,0,GunNo) > 0)
 	{
+		if(BMS_HELI == BackCOMM->agreetype)
+		{
+			heli_deal_bms_msg(Canmsg,GunNo);
+			return GBT_RTN_SUCESS;
+		}
+	
 		ptrPF = (PDU_HEAD_STRUCT *)(&Canmsg.Id.ExtId);
 		if ( ptrPF->sbit.PS != CHARGER_ADDR || ptrPF->sbit.SA != BMS_ADDR) { /*普天的桩地址为0xE5*/
 			if( ptrPF->sbit.SA == BMS_ADDR  || ptrPF->sbit.PS == PUTIAN_CHARGER_ADDR) {

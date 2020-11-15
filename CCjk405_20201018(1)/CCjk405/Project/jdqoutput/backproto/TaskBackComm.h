@@ -37,6 +37,7 @@ typedef enum
 	CONN_CHGBIRD,     /* ³äÖ®ÄñºóÌ¨ */    
 	CONN_CHGZPLD,     /* ÕıÆ½Â¡µØºóÌ¨ */
 	CONN_CHCP,        /* ³ÎÅôºóÌ¨ */
+	BMS_HELI,         /* ºÏÁ¦Ğ­Òé£¬´ËĞ­Òé²»ÎªºóÌ¨Ğ­Òé£¬ÔİÊ±·ÅÔÚ´Ë´¦£¬´ı¸Ä */
 }Back_AgreeTYPE;
 
 #define  SUPPORT_Agree  CONN_CheDian 
@@ -95,7 +96,7 @@ typedef struct BackRunPara
 	 uint16 msg_len;
 }BackRun_t;
 
-extern uint32 DevRunSec;     //Éè±¸ÔËĞĞ¶àÉÙÃ
+extern uint32 DevRunSec;     //Éè±¸ÔËĞĞ¶àÉÙ?
 
 /*ºóÌ¨²ÎÊı*/
 extern BACK_CTRL_STRUCT g_BackCtrl;

@@ -52,8 +52,8 @@ uint8 RelayOut_ALocked(uint8 fg)
 					Delay10Ms(20);
 			 }else {
 				 WriteJoutputDataBit(JOUT_AELOCKKM,(BitAction)fg);
-				    Delay5Ms(1);		//patli 20200220 60 to 1
-//					Delay10Ms(1);      //patli 20200220 60 to 1
+//				    Delay5Ms(1);		//patli 20200220 60 to 1
+					Delay10Ms(10);      //zyf 20201107 5ms to 100ms
 					if(ptrStu->runstu.bits.elockstu == CTRL_ON){//CTRL_ON ÎªËø
 					  if( sCnt++ > 3 ) {
 							sFirstFg = 0;

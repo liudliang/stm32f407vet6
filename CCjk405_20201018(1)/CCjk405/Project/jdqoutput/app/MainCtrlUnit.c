@@ -699,9 +699,10 @@ void TaskMain_InitChargeData(uint8 gunNo)
 
 MSG_WORK_STATUS_STRUCT  m_msg_work_status;
 
-static void TaskMian_SendProcessMsg(uint8 gunNo,uint8 statu,uint8 reason,uint8 errcode,uint8 accFg)
+void TaskMian_SendProcessMsg(uint8 gunNo,uint8 statu,uint8 reason,uint8 errcode,uint8 accFg)
 {
 	uint8  msg[5] = {0};
+	
 #if 0
 	if(statu == IDEL)   //直接发送消息给屏
 	{
@@ -734,6 +735,8 @@ static void TaskMian_SendProcessMsg(uint8 gunNo,uint8 statu,uint8 reason,uint8 e
 
 #endif
 }
+
+
 static void TaskMain_SetErrCode(uint8 gunNo,uint8 err)
 {
 	 gPtrRunData[gunNo]->logic->stopReason = EERR_REASON;  
@@ -1016,14 +1019,23 @@ void ChargeCtrlStep(CTRL_STEP *ptrCtrl,PROTO_ST *proto)
 			RelayOut_DcConTactKmOut(PW_CTRL_OFF);
 
 			RelayOut_AssistPower(ptrCtrl->gunNo,ASSIST_POWER_ON); //patli 20191108
-			DebugInfoByCon("STEP_BPOWER，打开辅源与BMS通信。。。");				 
-				 
-			Bms_SetStepErrFg(ptrCtrl->gunNo,BHM_TM,0);
-			Bms_StartTimeCount(ptrCtrl->gunNo,BHM_TM,GetSystemTick());
-			TaskMian_SendProcessMsg(ptrCtrl->gunNo,CHECK,E4_CHKISO,0,0);
-				 
-			proto->ctrlreport(ptrCtrl->gunNo,CHM_CODE,CRICLE_ALLOWED,1);
-			SET_WORKSTEP(ptrCtrl->gunNo,STEP_SKHANDS);
+			DebugInfoByCon("STEP_BPOWER，打开辅源与BMS通信。。。");		
+
+			if(BMS_HELI == BackCOMM->agreetype)
+			{
+				proto->ctrlreport(0,CCS_CODE,CRICLE_ALLOWED,1);  //合力叉车协议需要上电就发
+				SET_WORKSTEP(ptrCtrl->gunNo,STEP_BRO_SUB);
+			}
+			else
+			{					 
+				Bms_SetStepErrFg(ptrCtrl->gunNo,BHM_TM,0);
+				Bms_StartTimeCount(ptrCtrl->gunNo,BHM_TM,GetSystemTick());
+				TaskMian_SendProcessMsg(ptrCtrl->gunNo,CHECK,E4_CHKISO,0,0);
+				
+				proto->ctrlreport(ptrCtrl->gunNo,CHM_CODE,CRICLE_ALLOWED,1);
+				SET_WORKSTEP(ptrCtrl->gunNo,STEP_SKHANDS);
+			}
+
 			break;
 		case STEP_SKHANDS:
 		 	
@@ -1356,8 +1368,37 @@ void ChargeCtrlStep(CTRL_STEP *ptrCtrl,PROTO_ST *proto)
 			 }
 			 break; /*收到BRO报文完成跳转 SET_WORKSTEP(STEP_BRO_SUB);*/
 		 case STEP_BRO_SUB:
-		 			 	   
-			   DebugInfoByCon("STEP_BRO_SUB，准备阶段，模块等准备中");
+			if(BMS_HELI == BackCOMM->agreetype)
+			{
+				u16TmpCnt = 0;
+		   		Delay10Ms(1);
+
+			 	do 
+			 	{
+//					tmp16 = ((CHARGE_TYPE *)ChgData_GetRunDataPtr())->meter->volt;    //直流电压(外侧)
+					tmp16 = Bms_GetBmsCarDataPtr(0)->bcp.batcurvolt;     //因绝缘检测检测的不准，暂时的替代方法
+					
+				  	if (u16TmpCnt++ > 2000)   //40S
+					{
+						u16TmpCnt = 0;
+						SET_STOPING(ptrCtrl->gunNo,STEP_CHGEND,UNLOCKED_END);/*退出*/
+						break;
+					}
+					
+					Delay10Ms(2);
+					
+					if (TskMain_HardWareErrCheck(ptrCtrl->gunNo) > 0) 
+					{
+						 SET_STOPING(ptrCtrl->gunNo,STEP_CHGEND,UNLOCKED_END); /*退出*/;
+						 break;
+					}
+					
+			 	} while (tmp16 < VOLT_TRAN(50)); 
+			
+			}
+			else
+			{
+				DebugInfoByCon("STEP_BRO_SUB，准备阶段，模块等准备中");
 				/*停止发送CTS*/
 				proto->ctrlreport(ptrCtrl->gunNo,CTS_CODE,CRICLE_DISALLOWED,0);
 				/*停止发送CML*/
@@ -1365,17 +1406,17 @@ void ChargeCtrlStep(CTRL_STEP *ptrCtrl,PROTO_ST *proto)
 	
 				/*发送未准备就绪的CRO*/
 				((CHGDATA_ST *)Bms_GetChgDataPtr(ptrCtrl->gunNo))->cro.crostu = CRO_READYNO;
-		    proto->singreport(ptrCtrl->gunNo,CRO_CODE,CRO_READYNO);
+		    	proto->singreport(ptrCtrl->gunNo,CRO_CODE,CRO_READYNO);
 				proto->ctrlreport(ptrCtrl->gunNo,CRO_CODE,CRICLE_ALLOWED,0);
-		    Delay10Ms(1);
+		    	Delay10Ms(1);
 		 
 				TaskMian_SendProcessMsg(ptrCtrl->gunNo,CHECK,E12_CHKPARA,0,0);
 				u16TmpCnt = 0;
 		    
-		    /*BYD E6 必须先回OK，车端接触器才能闭合*/
+		    	/*BYD E6 必须先回OK，车端接触器才能闭合*/
 		 
-				do 
-				{
+			   do 
+			   {
 					if( u16TmpCnt++ > 1000 ) {
 						u16TmpCnt = 0;
 						/*【车辆侧电压与报文不一致大于±5%】*/
@@ -1391,7 +1432,11 @@ void ChargeCtrlStep(CTRL_STEP *ptrCtrl,PROTO_ST *proto)
 					}
 					tmp16 = gPtrRunData[ptrCtrl->gunNo]->bms->car.bcp.batcurvolt;
 					TaskMian_SendProcessMsg(ptrCtrl->gunNo,CHECK,E12_CHKPARA,0,0);
-			 }while (CHECK_TRUE != Check_CarVolt(ptrCtrl->gunNo)); 
+			  }while (CHECK_TRUE != Check_CarVolt(ptrCtrl->gunNo)); 
+			
+			}
+		 
+
 			 
 //			 /* 桩端测的电压不应该是负值 */
 //			 if (((CHARGE_TYPE *)ChgData_GetRunDataPtr(ptrCtrl->gunNo))->iso->vdc3 < -600)
@@ -1422,10 +1467,21 @@ void ChargeCtrlStep(CTRL_STEP *ptrCtrl,PROTO_ST *proto)
 			 TaskMian_SendProcessMsg(ptrCtrl->gunNo,CHECK,E13_DCOUTADJ,0,0);
 			 
 			 u16TmpCnt = 0;
-				
+
+
 			 /* 按照实际检测到的电池电压调整模块 */
 //			 tmp16 = ((CHARGE_TYPE *)ChgData_GetRunDataPtr(ptrCtrl->gunNo))->iso->vdc3;  /*接触器外侧电压*/ 	
              tmp16 = AdcCalc_GetValue()->vdciso[1];
+
+			if(BMS_HELI == BackCOMM->agreetype)
+		 	{
+		 		if (tmp16 < VOLT_TRAN(50))     //合力叉车协议
+			 	{
+				 	Check_SetErrCode(ptrCtrl->gunNo,ECODE50_BMSFINISH);
+				 	SET_STOPING(ptrCtrl->gunNo,STEP_CHGEND,UNLOCKED_END); /*退出*/;
+				 	break;
+			 	}
+		 	}
 			
 			 tmps2c.s = tmp16 - VOLT_TRAN(2); /*电池电压 -1~10V*/
 			 msg[0] = ptrCtrl->gunNo;
@@ -1467,12 +1523,15 @@ void ChargeCtrlStep(CTRL_STEP *ptrCtrl,PROTO_ST *proto)
 				  Delay10Ms(20);
 
 					RelayOut_RunChargeLed(ptrCtrl->gunNo,CTRL_ON); /*运行指示灯 */
-					
-					/* 发送准备就绪的CRO */
-				  ((CHGDATA_ST *)Bms_GetChgDataPtr(ptrCtrl->gunNo))->cro.crostu = CRO_READYOK;
-					proto->singreport(ptrCtrl->gunNo,CRO_CODE,CRO_READYOK);
-					proto->ctrlreport(ptrCtrl->gunNo,CRO_CODE,CRICLE_ALLOWED,0);
-					Delay10Ms(5);
+
+					if(BMS_HELI != BackCOMM->agreetype)	
+					{
+						/* 发送准备就绪的CRO */
+					    ((CHGDATA_ST *)Bms_GetChgDataPtr(ptrCtrl->gunNo))->cro.crostu = CRO_READYOK;
+						proto->singreport(ptrCtrl->gunNo,CRO_CODE,CRO_READYOK);
+						proto->ctrlreport(ptrCtrl->gunNo,CRO_CODE,CRICLE_ALLOWED,0);
+						Delay10Ms(5);
+					}
 				 
 					Bms_SetStepErrFg(ptrCtrl->gunNo,BCL_TM,0);
 					Bms_SetStepErrFg(ptrCtrl->gunNo,BCS_TM,0);
