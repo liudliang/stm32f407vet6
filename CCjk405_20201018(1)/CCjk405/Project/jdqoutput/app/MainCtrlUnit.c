@@ -35,6 +35,7 @@
 #include "PowerSplitt.h"
 
 #include "Adc_Calc.h"
+#include "HeLiBmsProto.h"
 
 
 extern RD_PARA_ST gSSTE2ROMTabl;
@@ -379,6 +380,7 @@ uint8  TskMain_StopCondition(uint8 gunNo)
 	 PARAM_OPER_TYPE *param = ChgData_GetRunParamPtr();
 	 REAL_BILL_DATA_ST *ptrBill = GetFeeData(gunNo);
 	 CARD_INFO *PtrCard = TskCard_GetCardInfPtr();	   //patli 20190929
+	 PARAM_COMM_TYPE *BackCOMM = ChgData_GetCommParaPtr();
 	
 	 if( pBmsErr->stu.dword ) {
 		  errCode = Bms_GetErrCode(gunNo);
@@ -449,10 +451,13 @@ uint8  TskMain_StopCondition(uint8 gunNo)
 		 Check_SetErrCode(gunNo,ECODE32_GUNTMPOVER);
 		 errCnt++;
 	 }
-	  
-	 if (1 == gPtrRunData[gunNo]->gun->statu.bits.bcpovervolt) {
-		 Check_SetErrCode(gunNo, ECODE108_BCPOVERVOLT);
-		 errCnt++;
+	
+	 if(BMS_HELI != BackCOMM->agreetype)
+	 {	 
+		 if (1 == gPtrRunData[gunNo]->gun->statu.bits.bcpovervolt) {
+			 Check_SetErrCode(gunNo, ECODE108_BCPOVERVOLT);
+			 errCnt++;
+		 }
 	 }
 	 
 	 if( CHG_TIME_TYPE == gPtrRunData[gunNo]->logic->chgmod ) {
@@ -535,6 +540,72 @@ uint8  TskMain_StopCondition(uint8 gunNo)
 			 ; 
 		 }
 	 }
+
+	 if(BMS_HELI == BackCOMM->agreetype)
+	 {	 
+		 switch(pCar->bst.heli_faultrsn.byte){
+			case 1:
+				Check_SetErrCode(gunNo, HELI_ECODE49_BMS_STOP_NORMOL);
+				errCnt++;
+				break;
+		 	case 2:
+				Check_SetErrCode(gunNo, HELI_ECODE109_CHARG_VOL_OVER);
+				errCnt++;
+				break;
+			case 3:
+				Check_SetErrCode(gunNo, HELI_ECODE110_OVER_TEMPERATURE);
+				errCnt++;
+				break;
+			case 4:
+				Check_SetErrCode(gunNo, HELI_ECODE111_INTERLOCK);
+				errCnt++;
+				break;
+			case 5:
+				Check_SetErrCode(gunNo, HELI_ECODE112_LOWER_TEMPERATURE);
+				errCnt++;
+				break;
+		 	case 6:
+				Check_SetErrCode(gunNo, HELI_ECODE113_CELL_VOL_LOWER);
+				errCnt++;
+				break;
+			case 7:
+				Check_SetErrCode(gunNo, HELI_ECODE114_CURR_OVER);
+				errCnt++;
+				break;
+		 	case 8:
+				Check_SetErrCode(gunNo, HELI_ECODE115_BMS_FAULT);
+				errCnt++;
+				break;
+			case 9:
+				Check_SetErrCode(gunNo, HELI_ECODE116_CONNECTOR_OVER_TEMPERATURE);
+				errCnt++;
+				break;
+		 	case 10:
+				Check_SetErrCode(gunNo, HELI_ECODE117_CC2_FAULT);
+				errCnt++;
+				break;
+			case 11:
+				Check_SetErrCode(gunNo, HELI_ECODE118_CELLS_VOL_DIFF);
+				errCnt++;
+				break;
+		 	case 12:
+				Check_SetErrCode(gunNo, HELI_ECODE119_CELLS_TEMPERATURE_DIFF);
+				errCnt++;
+				break;
+			case 13:
+				Check_SetErrCode(gunNo, HELI_ECODE46_CONNECTOR_TEMPERATURE_LOSS);
+				errCnt++;
+				break;
+		 	case 14:
+		 	case 15:
+				Check_SetErrCode(gunNo, HELI_ECODE47_OTHER);
+				errCnt++;
+				break;			
+			default:
+				break;				 
+			 
+		 }
+	 }	 
 	 
 	 if ( pCar->bst.faultrsn.word ) {
 		 if(pCar->bst.faultrsn.bits.isoflt == 0x01) {
@@ -879,6 +950,7 @@ void ChargeCtrlStep(CTRL_STEP *ptrCtrl,PROTO_ST *proto)
 	DEV_LOGIC_TYPE *ptrOtherlogic =  ChgData_GetLogicDataPtr((ptrCtrl->gunNo+1)% MAX_MOD_GROUP);
 	RCV_PACK_ST *ptrBmsPack = Bms_GetBmsPack(ptrCtrl->gunNo);
 	CHGDATA_ST *pBmsSendPackChg = Bms_GetChgDataPtr(ptrCtrl->gunNo);
+	BMSDATA_ST *pCar = Bms_GetBmsCarDataPtr(ptrCtrl->gunNo);
 	 
 	switch(gPtrRunData[ptrCtrl->gunNo]->logic->workstep) {
 		case STEP_IDEL:
@@ -1024,6 +1096,7 @@ void ChargeCtrlStep(CTRL_STEP *ptrCtrl,PROTO_ST *proto)
 			if(BMS_HELI == BackCOMM->agreetype)
 			{
 				proto->ctrlreport(0,CCS_CODE,CRICLE_ALLOWED,1);  //合力叉车协议需要上电就发
+				memset(pCar,0,sizeof(BMSDATA_ST));
 				SET_WORKSTEP(ptrCtrl->gunNo,STEP_BRO_SUB);
 			}
 			else
@@ -1378,9 +1451,10 @@ void ChargeCtrlStep(CTRL_STEP *ptrCtrl,PROTO_ST *proto)
 //					tmp16 = ((CHARGE_TYPE *)ChgData_GetRunDataPtr())->meter->volt;    //直流电压(外侧)
 					tmp16 = Bms_GetBmsCarDataPtr(0)->bcp.batcurvolt;     //因绝缘检测检测的不准，暂时的替代方法
 					
-				  	if (u16TmpCnt++ > 2000)   //40S
+				  	if (u16TmpCnt++ > 1000)   //20S
 					{
 						u16TmpCnt = 0;
+						Check_SetErrCode(0,ECODE7_BCLTM);
 						SET_STOPING(ptrCtrl->gunNo,STEP_CHGEND,UNLOCKED_END);/*退出*/
 						break;
 					}
@@ -1394,6 +1468,10 @@ void ChargeCtrlStep(CTRL_STEP *ptrCtrl,PROTO_ST *proto)
 					}
 					
 			 	} while (tmp16 < VOLT_TRAN(50)); 
+				if(STEP_CHGEND == gPtrRunData[ptrCtrl->gunNo]->logic->workstep)
+				{
+					break;
+				}
 			
 			}
 			else
@@ -1475,12 +1553,16 @@ void ChargeCtrlStep(CTRL_STEP *ptrCtrl,PROTO_ST *proto)
 
 			if(BMS_HELI == BackCOMM->agreetype)
 		 	{
+		 		Delay10Ms(100);  //1秒
+				heli_Bill_SetCarBmsData(ptrCtrl->gunNo);
+#ifndef BMSTEST					
 		 		if (tmp16 < VOLT_TRAN(50))     //合力叉车协议
 			 	{
-				 	Check_SetErrCode(ptrCtrl->gunNo,ECODE50_BMSFINISH);
+				 	Check_SetErrCode(ptrCtrl->gunNo,HELI_ECODE48_OUTSIDE_KM_50LESS);
 				 	SET_STOPING(ptrCtrl->gunNo,STEP_CHGEND,UNLOCKED_END); /*退出*/;
 				 	break;
 			 	}
+#endif				
 		 	}
 			
 			 tmps2c.s = tmp16 - VOLT_TRAN(2); /*电池电压 -1~10V*/
@@ -1513,8 +1595,7 @@ void ChargeCtrlStep(CTRL_STEP *ptrCtrl,PROTO_ST *proto)
 //					/*此处需要跳转到故障*/
 //					SET_STOPING(ptrCtrl->gunNo,STEP_CHGEND,UNLOCKED_END);/*退出*/
 //					break;
-//				  }
-
+//				  }			 
 				
 				  Bms_SetStepErrFg(ptrCtrl->gunNo,KMINOUT_ERR,0);
 				  TaskMian_SendProcessMsg(ptrCtrl->gunNo,CHECK,E14_STRATCHG,0,0);
@@ -1567,7 +1648,10 @@ void ChargeCtrlStep(CTRL_STEP *ptrCtrl,PROTO_ST *proto)
 						/* 按照实际检测到的电池电压调整模块 */
 //						tmp16 = ((CHARGE_TYPE *)ChgData_GetRunDataPtr(ptrCtrl->gunNo))->iso->vdc3; /*接触器外侧电压*/	
                         tmp16 = AdcCalc_GetValue()->vdciso[1];
-
+						if(tmp16 < VOLT_TRAN(50))
+						{
+							break;
+						}
 						tmps2c.s = tmp16 - VOLT_TRAN(2); /*电池电压 -1~10V*/
 						msg[0] = ptrCtrl->gunNo;
 						msg[1] = tmps2c.c[0]; /*电压*/

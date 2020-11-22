@@ -190,6 +190,7 @@ static BOOL CANDevDefInit(STM32F40x_CAN_CHAN* pChan)
 {
 	CAN_TypeDef* pbase = (CAN_TypeDef *)pChan->base;
 	uint8 fitercnt = 0;
+	PARAM_COMM_TYPE *BackCOMM = ChgData_GetCommParaPtr();
 	
 	/*port and clock init*/
 	CanPortAndClockInit(pChan);
@@ -215,7 +216,14 @@ static BOOL CANDevDefInit(STM32F40x_CAN_CHAN* pChan)
   
   if(CAN1 == pbase)
   {
-  	pChan->CAN_InitStructure.CAN_Prescaler = 8;
+		if(BMS_HELI == BackCOMM->agreetype)
+		{	
+			pChan->CAN_InitStructure.CAN_Prescaler = 16;
+		}
+		else
+		{
+			pChan->CAN_InitStructure.CAN_Prescaler = 8;
+		}
   }
   else
   {
@@ -286,6 +294,7 @@ int32 Can_Open(uint32 deviceId)
 				CANChan[deviceId].base           = CANParameter[deviceId].base; 
 				if(BMS_HELI == BackCOMM->agreetype)
 				{		
+					CANChan[deviceId].baudRate       = 125000;
 					CANChan[deviceId].canID          = HELI_BMS1_CANID;  
 					CANChan[deviceId].canMaskId      = HELI_BMS1_MASKID; 
 				}

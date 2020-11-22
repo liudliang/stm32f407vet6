@@ -81,9 +81,9 @@ const GPIO_INFO_T conLED_gpio[] =
 ******************************************************************************************/
 void LEDToggle(Led_TypeDef Led)
 {
-	static uint8 fg = 0;
-	fg = ~fg;
-	GPIO_WriteBit(conLED_gpio[Led].ioport, conLED_gpio[Led].iopin, (BitAction)(fg & 0x01));
+	static uint8 fg[LED_MAX] = {0};
+	fg[Led] = ~fg[Led];
+	GPIO_WriteBit(conLED_gpio[Led].ioport, conLED_gpio[Led].iopin, (BitAction)(fg[Led] & 0x01));
 }
 
 /****************************************************************************************

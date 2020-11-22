@@ -172,7 +172,7 @@ extern REAL_BILL_DATA_ST *GetFeeData(uint8 gunNo);
 
 
 extern void Bill_SetCarBmsData(uint8 gunNo);
-
+void heli_Bill_SetCarBmsData(uint8 gunNo);
 
 
 

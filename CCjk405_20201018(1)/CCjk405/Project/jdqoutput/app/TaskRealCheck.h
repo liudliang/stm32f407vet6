@@ -58,6 +58,8 @@ typedef enum
 	ECODE44_DC3OVER =44,      /*3枪直流输出过压*/ 
 	ECODE45_DC4OVER =45,      /*4枪直流输出过压*/ 
 	
+	
+	
 	/*BMS*/
 	ECODE50_BMSFINISH = 50,   /*收到BMS停止报文,达到SOC设定值*/ 
 	ECODE51_BMSTVOLT=51,      /*收到BMS停止报文,达到总电压设定值*/   

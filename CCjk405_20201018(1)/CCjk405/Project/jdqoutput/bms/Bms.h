@@ -237,6 +237,16 @@ typedef  struct BST
 			uint8 rsv:4;
 		}bits;
 	}errorrsn;
+
+//-----------------------add20201122zyf helibms½áÊø±êÊ¶
+	union {
+		uint8 byte;
+		struct{
+			uint8 rsv:8;
+		}bits;
+	}heli_faultrsn;
+//-----------------------
+	
 }BST_ST;
 
 typedef  struct CST

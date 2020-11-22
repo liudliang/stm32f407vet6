@@ -40,6 +40,7 @@ typedef enum
   LED1 = 0,
   LED2,
   LED3,
+	LED_MAX,
 }Led_TypeDef;
 
 /*指示灯控制口*/

@@ -37,7 +37,7 @@ Version: v0.01
 
 //#define MODULE_DEBUG           //电源模块LOG输出开关
 #define BMS_DEBUG              //BMS LOG输出开关
-//#define CONTROL_DEBUG						//充电控制引导LOG输出开关
+#define CONTROL_DEBUG						//充电控制引导LOG输出开关
 //#define SCREEN_DEBUG         		//屏幕显示log输出开关
 //#define BACK_COMM_DEBUG					//后台log输出开关
 

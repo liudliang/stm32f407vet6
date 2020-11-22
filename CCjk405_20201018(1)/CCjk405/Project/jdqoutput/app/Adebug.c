@@ -1460,8 +1460,8 @@ void DebugInfoOutput(uint8 *buf, uint16 len)
 #endif
 
 #ifdef SCOMM_DEBUG		
-		ScommDebugPrintStrWithLen((char*)buf, len);
-//	printf("%s", buf);
+//		ScommDebugPrintStrWithLen((char*)buf, len);
+	printf("%s", buf);
 #endif
 	}
 

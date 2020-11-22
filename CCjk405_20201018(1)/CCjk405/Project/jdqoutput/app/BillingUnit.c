@@ -210,6 +210,14 @@ void Bill_SetCarBmsData(uint8 gunNo)
 	Dealadd_VIN(gFeeData[gunNo].bill.vincode,17);
 }
 
+void heli_Bill_SetCarBmsData(uint8 gunNo)
+{
+		/*bms数据*/
+	BMSDATA_ST *pBms = Bms_GetBmsCarDataPtr(gunNo);
+  gFeeData[gunNo].bill.startsoc = pBms->bcs.cursoc;
+	gFeeData[gunNo].bill.soc = pBms->bcs.cursoc;
+}
+
 
 /*设置结束计费数据*/
 void Bill_SetStopData(uint8 gunNo,uint8 reason,uint8 errcode)

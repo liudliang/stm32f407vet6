@@ -14,6 +14,7 @@
 #include "TaskBackComm.h"
 #include "wdg.h"
 #include "gpio.h"
+#include "HeLiBmsProto.h"
 
 
 
@@ -233,6 +234,10 @@ const STR_ERR_ST conErrStr[]=
 	{ECODE43_DC2OVER,         "2直流输出过压"},
 	{ECODE44_DC3OVER,         "3直流输出过压"},
 	{ECODE45_DC4OVER,         "4直流输出过压"},
+{HELI_ECODE46_CONNECTOR_TEMPERATURE_LOSS,  "heli充电座温度丢失"},
+{HELI_ECODE47_OTHER,                       "heli其它"},
+{HELI_ECODE48_OUTSIDE_KM_50LESS,			     "heli电池电压低于50V"},
+{HELI_ECODE49_BMS_STOP_NORMOL,             "heli充电完成"},    
 	{ECODE50_BMSFINISH,       "收到BMS停止报文,达到SOC设定值"},
 	{ECODE51_BMSTVOLT,        "收到BMS停止报文,达到总电压设定值"},
 	{ECODE52_BMSSVOLT,        "收到BMS停止报文,达到单体电压设定值"},
@@ -284,6 +289,18 @@ const STR_ERR_ST conErrStr[]=
 	{ECODE106_VINBACKTM,          "后台获取VIN信息超时"},
 	{ECODE107_BACKOFF,"后台通讯故障"},
 	{ECODE108_BCPOVERVOLT,"充电电压超过BCP报文最高允许值"},
+	
+{HELI_ECODE109_CHARG_VOL_OVER,              "heli总压过充保护"},
+{HELI_ECODE110_OVER_TEMPERATURE,            "heli过温保护"},
+{HELI_ECODE111_INTERLOCK,                   "heli互锁保护"},
+{HELI_ECODE112_LOWER_TEMPERATURE,           "heli低温充电保护"},
+{HELI_ECODE113_CELL_VOL_LOWER,              "heli单体电压过低"},
+{HELI_ECODE114_CURR_OVER,                   "heli充电电流过大"},
+{HELI_ECODE115_BMS_FAULT,                   "heliBMS 故障保护"},
+{HELI_ECODE116_CONNECTOR_OVER_TEMPERATURE,  "heli充电座过温保护"},
+{HELI_ECODE117_CC2_FAULT,                   "heli电池 CC2 异常"},
+{HELI_ECODE118_CELLS_VOL_DIFF,              "heli单体压差过大"},
+{HELI_ECODE119_CELLS_TEMPERATURE_DIFF,      "heli单体温差过大"},	
 };
 
 #define ERROR_NUM (sizeof(conErrStr)/sizeof(STR_ERR_ST))
@@ -2084,6 +2101,8 @@ extern char *ChargeCP_GetCPTwoDim(void);
 #define BIRD_TWODIM1  "{\"gunNumber\":"
 #define BIRD_TWODIM2  ",\"snNumber\":\""
 #define BIRD_TWODIM3 "\",\"type\":\"1\"}"
+#define HELI_LBX  "http://www.lucksion.com"
+
 void TwoDimBarCode(void)
 {
 	char text[128 + 4] = { 0 };
@@ -2110,7 +2129,12 @@ void TwoDimBarCode(void)
 		Screen_ShowMessage(ID_B,DGUS_NUMBER_ADR_B);
 	}
 
-	if (CONN_Aunice == BackCOMM->agreetype){
+	if (BMS_HELI == BackCOMM->agreetype){
+		memset(text,0,sizeof(text));
+		strcpy(text,HELI_LBX);
+		Hmi_ShowText(DGUS_TWODIMBARCODE_ADDR_A,strlen(text),(uint8 *)text);
+	}	
+	else if (CONN_Aunice == BackCOMM->agreetype){
 		memset(text,0,sizeof(text));
 		strcpy(text,LT_TWODIMBARCODR_HEAD);
 		memset(ID_A,0,sizeof(ID_A));
@@ -2465,7 +2489,7 @@ void Screen_ShowCyclic()
 				case E_PICTURE47:	
 					if(sTwoDim){
 					  TwoDimBarCode(); /*二维码显示*/
-						sTwoDim = 0;
+						sTwoDim = 1;
 					}
 					IDEL_ShowGunState(AGUN_NO);
 					break;
