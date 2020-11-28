@@ -130,7 +130,7 @@
 #define APP_TASK_START_DELAY        	50   	//500ms
 
 #define APP_TASK_AGUNBMS_DELAY       	25  	//25	//20		//200ms
-#define APP_TASK_DCMETER_DELAY       	20  //20  //15		//150ms
+#define APP_TASK_DCMETER_DELAY       	5  //20  //15		//150ms
 #define APP_TASK_DLMOD_DELAY         	10		//200ms
 #define APP_TASK_SCREEN_DELAY        	15  //20  //15 	//150ms
 #define APP_TASK_BACK_DELAY          	15 		//100ms  

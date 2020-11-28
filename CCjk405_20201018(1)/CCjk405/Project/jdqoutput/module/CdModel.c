@@ -71,9 +71,12 @@ uint8 CdModData_CheckCommErr(uint8 grpNo)
 {
 	 static uint8 sErrCnt[2] = {0};
 	 uint8 i,cnt,pregrp;
+	 uint32 curr_gun[2] = {0},vol_gun[2] = {0},tmpdata = 0;
 	 CDMOD_DATA * ptrModData = CdModData_GetDataPtr(0);
 	 PARAM_OPER_TYPE *ptrRunParam = ChgData_GetRunParamPtr();
 	 MOD_CTRL_PARA *ptrModGpPara = CdModData_GetModGpPara((grpNo)%MAX_MOD_GROUP);
+	 DEV_METER_TYPE *pDCMet = TskDc_GetMeterDataPtr(grpNo);
+	 
 
 #if 1	
 	  grpNo %= MAX_MOD_GROUP;
@@ -93,10 +96,24 @@ uint8 CdModData_CheckCommErr(uint8 grpNo)
 		 if( 0 ==  ptrModData[i].commErr ) {
 			   ptrModData[i].vaild = 1;
 				 cnt++;
+			
+				 curr_gun[grpNo] += ptrModData[i].outCurr;    //add20201124zyf
+			   tmpdata = ptrModData[i].outVolte;
+				 if(vol_gun[grpNo] < tmpdata)
+				 {
+					 vol_gun[grpNo] = tmpdata;
+				 }
 		 }else {
 			 ptrModData[i].vaild = 0;
 		 }
 	 }
+	 
+	if(DCMETER_RECT == DCMETER_TYPE)      //add20201124zyf
+	{
+		pDCMet->current = curr_gun[grpNo]; 
+		pDCMet->volt = vol_gun[grpNo]; 
+	}
+	 
 	 if((cnt <= (ptrRunParam->grpmodnum[grpNo]) ) && (cnt > 0 ) ) {
 		 gModCommList[grpNo].num = cnt;
 		 gModCommList[grpNo].vaild = 1;

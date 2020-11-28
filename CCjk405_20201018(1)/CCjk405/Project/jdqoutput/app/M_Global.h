@@ -222,6 +222,13 @@
 	#endif	
 #endif		  
 
+/****************************电表相关**********************************************/	
+
+#define DCMETER_DLT645_2007         0       //DLT645_2007协议的电表
+#define DCMETER_RECT                1       //从功率模块中得来
+
+#define DCMETER_TYPE                DCMETER_RECT
+
 
 #endif
 

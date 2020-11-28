@@ -776,11 +776,24 @@ void ProBmsStepAdjustCurr(void)
 			{
 				gStepCurrent = tmp16;
 			}
+			
+			
 //			if( (ptr->bcl.needvolt > ptr->bcp.chgmaxvolt) || (ptr->bcl.needvolt > (ptrRunParam->maxvolt+50 ))\
 //					 || ptr->bcl.needvolt < 100 )
 //			{ /*最高需求大于 > 755V 或者 < 10V 认为数据出错*/
 //					  return;
 //			}
+			
+			if (ptr->bcl.needvolt > ptrRunParam->maxvolt)
+			{
+				ptr->bcl.needvolt = ptrRunParam->maxvolt;
+			}
+			
+			if( gStepCurrent > ptrRunParam->maxcurr ) 
+			{ 
+				gStepCurrent = ptrRunParam->maxcurr;
+			}
+
 
 			if (ptr->bcl.needvolt > ptrRunParam->maxvolt || ptr->bcl.needvolt < ptrRunParam->minvolt) { 
 				return;

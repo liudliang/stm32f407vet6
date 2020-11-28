@@ -134,14 +134,13 @@ uint16 CdModel_ParseFrame(uint8 srcAdr,uint8 *data)
 			 Common_Change4Byte((uint32 *)&(da->db.val.u32d));/*1024倍*/
 			 fdata = (da->db.val.u32d/1024.0)*10;
 			 ptrModData->outVolte = fdata;
-			 pDCMet->volt = ptrModData->outVolte;
+//			 pDCMet->volt = ptrModData->outVolte;
 			 break;
 		 case OUT_CURR:  //0x0002 输出电流
 			 Common_Change4Byte((uint32 *)&(da->db.val.u32d));
 			 fdata = (da->db.val.u32d/1024.00) * 10 + 0.5;
 			 ptrModData->outCurr = fdata;
-//			 pDCMet->current = ptrModData->outCurr * devparaPtr->grpmodnum[0];  //叉车默认A枪
-		   pDCMet->current = ptrModData->outCurr +  CdModData_GetDataPtr(srcAdr%2)->outCurr;  //叉车默认A枪,固定两个模块
+//		   pDCMet->current = ptrModData->outCurr +  CdModData_GetDataPtr(srcAdr%2)->outCurr;  //叉车默认A枪,固定两个模块
 		   pDCMet->commOvertimecnt = 0;
 			 break;
 		 case INPUT_AC_AVOLT:  //0x000C 输入电压AC_A

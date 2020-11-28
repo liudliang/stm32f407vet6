@@ -253,7 +253,7 @@ static void CheckMeterDataErr(uint8 gunNo)
 	}
 	if( pMet->current > param->overdccurr ||
 		pMet->current > (param->singmodcurr*param->modnum+100)) { /* ¹ıÁ÷10A */
-		if( errCnt[gunNo][1]++ > 10 ) {
+		if( errCnt[gunNo][1]++ > 20 ) {
 			 pMet->statu.bits.currOver = 1;
 		 }
 	}else {

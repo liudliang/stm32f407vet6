@@ -251,6 +251,7 @@ uint8 TskMain_HardWareErrCheck(uint8 gunNo)
 	 uint8 errCnt;
 	 PARAM_OPER_TYPE *param = ChgData_GetRunParamPtr();
 	 CHGDATA_ST *pChg = Bms_GetChgDataPtr(gunNo);
+	 PARAM_COMM_TYPE *BackCOMM = ChgData_GetCommParaPtr();
 	
 	 errCnt = 0;
 	 if( 1 == gPtrRunData[gunNo]->iso->statu.bits.commerr ) {
@@ -348,12 +349,15 @@ uint8 TskMain_HardWareErrCheck(uint8 gunNo)
 			}
 	 }
 
-   if (1 == gPtrRunData[gunNo]->gun->statu.bits.overtemper) {
-		 Check_SetErrCode(gunNo, ECODE103_GUNOVERTEMPER);
-		 errCnt++;
-	 }else{
-		 Check_ClearErrBit(gunNo, ECODE103_GUNOVERTEMPER);		 
-	 }	 
+	 if((BMS_HELI != BackCOMM->agreetype))
+	 {	 
+		 if (1 == gPtrRunData[gunNo]->gun->statu.bits.overtemper) {
+			 Check_SetErrCode(gunNo, ECODE103_GUNOVERTEMPER);
+			 errCnt++;
+		 }else{
+			 Check_ClearErrBit(gunNo, ECODE103_GUNOVERTEMPER);		 
+		 }	 
+	 }
 	 
 	 if (1 == gPtrRunData[gunNo]->gun->statu.bits.bcpovervolt){
 		 Check_SetErrCode(gunNo, ECODE108_BCPOVERVOLT);
@@ -430,7 +434,7 @@ uint8  TskMain_StopCondition(uint8 gunNo)
 //		 errCnt++; 
 //	 }
 	 
-	 if( 1 == gPtrRunData[gunNo]->meter->statu.word ) {
+	 if( 1 < gPtrRunData[gunNo]->meter->statu.word ) {
 		 if( 1 == gPtrRunData[gunNo]->meter->statu.bits.commerr ) {
 				Check_SetErrCode(gunNo,ECODE93_METERCOMMERR);
 				errCnt++; 
@@ -446,11 +450,14 @@ uint8  TskMain_StopCondition(uint8 gunNo)
 		   Check_SetErrCode(gunNo,ECODE18_CC1LNK);
 		   errCnt++;
 	 }
-	 
-	 if( 1 == gPtrRunData[gunNo]->gun->statu.bits.overtemper ) {
-		 Check_SetErrCode(gunNo,ECODE32_GUNTMPOVER);
-		 errCnt++;
-	 }
+
+	 if((BMS_HELI != BackCOMM->agreetype))
+	 {
+		 if( 1 == gPtrRunData[gunNo]->gun->statu.bits.overtemper ) {
+			 Check_SetErrCode(gunNo,ECODE32_GUNTMPOVER);
+			 errCnt++;
+		 }
+   }
 	
 	 if(BMS_HELI != BackCOMM->agreetype)
 	 {	 
@@ -516,6 +523,12 @@ uint8  TskMain_StopCondition(uint8 gunNo)
 		 }
 	 }else {
 		 sDlayTicks[gunNo] = GetSystemTick();
+	 }
+	 
+	 if((pCar->bcs.cursoc > 99) && (BMS_HELI == BackCOMM->agreetype))
+	 {
+		 Check_SetErrCode(gunNo,HELI_ECODE49_BMS_STOP_NORMOL);
+		 errCnt++;
 	 }
 	 
 	 /*车辆端结束，放在最后判断*/
