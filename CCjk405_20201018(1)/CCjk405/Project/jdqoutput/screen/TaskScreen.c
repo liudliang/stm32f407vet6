@@ -236,7 +236,7 @@ const STR_ERR_ST conErrStr[]=
 	{ECODE45_DC4OVER,         "4直流输出过压"},
 {HELI_ECODE46_CONNECTOR_TEMPERATURE_LOSS,  "heli充电座温度丢失"},
 {HELI_ECODE47_OTHER,                       "heli其它"},
-{HELI_ECODE48_OUTSIDE_KM_50LESS,			     "heli电池电压低于50V"},
+{HELI_ECODE48_OUTSIDE_KM_40LESS,			     "heli电池电压低于40V"},
 {HELI_ECODE49_BMS_STOP_NORMOL,             "heli充电完成"},    
 	{ECODE50_BMSFINISH,       "收到BMS停止报文,达到SOC设定值"},
 	{ECODE51_BMSTVOLT,        "收到BMS停止报文,达到总电压设定值"},
@@ -1719,6 +1719,7 @@ void IDEL_ShowGunState(uint8 gunNo)
 extern void CardReader_MsgProc(MSG_STRUCT *msg);
 #endif
 
+extern DEV_INPUT_TYPE *Check_GetInputDataptr(uint8 gunNo);
 extern DEV_ISO_TYPE * TskIso_GetDataPtr(uint8 gunNo);
 void Screen_MessageDeal(void)
 {
@@ -1741,6 +1742,7 @@ void Screen_MessageDeal(void)
 	 PARAM_DEV_TYPE *chgparaPtr = ChgData_GetDevParamPtr();
    CARD_INFO *ptrCardinfo = TskCard_GetCardInfPtr();
 	 DEV_RELAY_TYPE *pRelayDataPtr = Relay_GetRelayDataPtr(0);	
+	 DEV_INPUT_TYPE *pInputDataptr = Check_GetInputDataptr(AGUN_NO);
    if( RcvMsgFromQueue(&msg) == TRUE ) {
 
 		 switch(msg.MsgType)
@@ -1928,7 +1930,14 @@ void Screen_MessageDeal(void)
 							break;
 						 case E_ERROR:   /*故障*/																 
 							 sGlocalPara.setparafg = 0;
-							 errstr = Screen_GetErrSting(msg.MsgData[3]);
+//							 if(1 == pInputDataptr->statu.bits.stop)
+//							 {
+//								 errstr = Screen_GetErrSting(ECODE89_CHGJTST);
+//							 }
+//							 else
+//							 {
+									errstr = Screen_GetErrSting(msg.MsgData[3]);
+//							 }
 							 Screen_ShowMessage(errstr->str,MsgWkstatuAdr[gunNo][3]);
 							 strcpy(temp,"请拨打服务电话：");
 							 strcat(temp,(char *)chgparaPtr->telephone);		

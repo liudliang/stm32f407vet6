@@ -24,7 +24,7 @@
 
 #define DEF_MAX_GUN_NO   2    /*定义枪数量*/
 
-#define MODULE_MINVOL 500    //模块的最小开启电压 
+#define MODULE_MINVOL 400    //模块的最小开启电压 
 #define MODULE_MAXVOL 4000   //patli 20201018 1100   //模块的最大开启电压
 
 typedef union

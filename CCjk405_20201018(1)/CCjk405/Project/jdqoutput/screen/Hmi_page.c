@@ -819,6 +819,7 @@ void Page_BMSDetails_B()
 	  sGlocalPara.bmskey = BGUN_NO;
   	Hmi_ChangePicture(E_PICTURE21);
 }
+
 void Page_VINStop_A()
 {
 	 uint8 CtrData[3];

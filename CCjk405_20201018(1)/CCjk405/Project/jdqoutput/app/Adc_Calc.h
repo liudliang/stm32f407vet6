@@ -48,7 +48,8 @@ typedef struct
     uint16 visodiff; /*A母线压差*/
     uint16 Respos;   /*A母线正对地电阻*/  
     uint16 Resneg;   /*A母线负对地电阻*/
-	uint16 vdciso[2];   /*vdciso[0]为板采集到的接触器内侧电压，vdciso[1]为外侧电压*/
+//	uint16 vdciso[2];   /*vdciso[0]为板采集到的接触器内侧电压，vdciso[1]为外侧电压*/
+		int32 vdciso[2];   /*vdciso[0]为板采集到的接触器内侧电压，vdciso[1]为外侧电压*/
 //    uint16 xfStatu;      /*电压泄放控制状态 bit0：一路  bit1：二路*/
     uint32 ResSeting;    /*绝缘电阻设定值*/
 	

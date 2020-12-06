@@ -91,8 +91,8 @@
 	#define FACTORY_RELEASE_END_ADDRESS			0x080E0000		//发布 程序区域结束块起始地址 
 
   	#if (PRODUCTS_LEVEL == DEBUG_VERSION)					//调试版本	
-	#define BMSTEST											//使用BMS模拟器
-	#define M_VERSION1 "D4071"         	                	/*版本后缀，没有为空 .t1*/
+//	#define BMSTEST											//使用BMS模拟器
+	#define M_VERSION1 "D4052"         	     //1为BMSTEST，非1屏蔽BMSTEST           	/*版本后缀，没有为空 .t1*/  
 	#define FLASH_BASE_LEAVE_FACTORY     BOOT_BASE_ADDRESS
 	#define VERSION_LETTER		0x54  //  'T'
 	#define TASK_RUN_TIME_PRINTF
@@ -143,8 +143,8 @@
 
 #define CCM_USE           //CCM 使用开关控制
 
-#if (PRODUCTS_LEVEL == FACTORY_UPGRADE_VERSION)
-#define NET_FTP_CLIENT   	1   //patli 20190909
+#if (PRODUCTS_LEVEL == FACTORY_UPGRADE_VERSION) 
+#define NET_FTP_CLIENT   	1   //patli 20190909    
 #define USB_HOST_SUPPORT		//patli 20191216
 #endif
 
@@ -199,7 +199,7 @@
 
 #ifdef AUNICE_DEBUG
 #define MAIN_VERSION	3
-#define SUB_VERSION	    1
+#define SUB_VERSION	    2
 
 #define U_MAIN_VERSION	0
 #define U_SUB_VERSION	1

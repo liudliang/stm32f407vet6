@@ -317,7 +317,11 @@ uint8  Datadeal_CalcDcJy(uint8 seq)
 void ADC_Debug(void)
 {
     static uint32 sU32tick = 0;
-    uint16 temp[2];	
+//    uint16 u16temp;	
+//		int16 temp1;
+	
+//		u16temp = gSampSysData.vdciso[1];
+//		temp1 = gSampSysData.vdciso[1];
     if( (GetSystemTick() - sU32tick > 5*CHK_MS) ) 
     {
 
@@ -327,6 +331,10 @@ void ADC_Debug(void)
 		  printf("realx+ = %d---",gSampSysData.visopos);       
       printf("realy- = %d---",gSampSysData.visoneg);        
       printf("realZ+ = %d ,realZ- = %d---",gSampSysData.vdciso[0],gSampSysData.vdciso[1]);
+//			if(temp1 < 0)
+//			{
+//				printf("int16 temp1 = %d",temp1);
+//			}
 		  printf("diff = %d---",gSampSysData.visodiff);
 	}
 }

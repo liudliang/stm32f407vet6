@@ -945,7 +945,7 @@ void DevEnterIdleStatus(CTRL_STEP* gun_ctrl)
  
 
 extern uint8 Check_KmInVoltOver(uint8 gunNo,uint16 volt_startISO);
-
+extern void ClearGunFallingEdge(void);
 /*直流桩充电流程*/
 void ChargeCtrlStep(CTRL_STEP *ptrCtrl,PROTO_ST *proto)
 {
@@ -1480,7 +1480,7 @@ void ChargeCtrlStep(CTRL_STEP *ptrCtrl,PROTO_ST *proto)
 						 break;
 					}
 					
-			 	} while (tmp16 < VOLT_TRAN(50)); 
+			 	} while (tmp16 < VOLT_TRAN(40)); 
 				if(STEP_CHGEND == gPtrRunData[ptrCtrl->gunNo]->logic->workstep)
 				{
 					break;
@@ -1569,9 +1569,9 @@ void ChargeCtrlStep(CTRL_STEP *ptrCtrl,PROTO_ST *proto)
 		 		Delay10Ms(100);  //1秒
 				heli_Bill_SetCarBmsData(ptrCtrl->gunNo);
 #ifndef BMSTEST					
-		 		if (tmp16 < VOLT_TRAN(50))     //合力叉车协议
+		 		if (tmp16 < VOLT_TRAN(40))     //合力叉车协议
 			 	{
-				 	Check_SetErrCode(ptrCtrl->gunNo,HELI_ECODE48_OUTSIDE_KM_50LESS);
+				 	Check_SetErrCode(ptrCtrl->gunNo,HELI_ECODE48_OUTSIDE_KM_40LESS);
 				 	SET_STOPING(ptrCtrl->gunNo,STEP_CHGEND,UNLOCKED_END); /*退出*/;
 				 	break;
 			 	}
@@ -1661,7 +1661,7 @@ void ChargeCtrlStep(CTRL_STEP *ptrCtrl,PROTO_ST *proto)
 						/* 按照实际检测到的电池电压调整模块 */
 //						tmp16 = ((CHARGE_TYPE *)ChgData_GetRunDataPtr(ptrCtrl->gunNo))->iso->vdc3; /*接触器外侧电压*/	
                         tmp16 = AdcCalc_GetValue()->vdciso[1];
-						if(tmp16 < VOLT_TRAN(50))
+						if(tmp16 < VOLT_TRAN(40))
 						{
 							break;
 						}
@@ -1718,7 +1718,10 @@ void ChargeCtrlStep(CTRL_STEP *ptrCtrl,PROTO_ST *proto)
 				 }
 			   break;
 		 case STEP_CHGEND: /* 充电开始后的结束到这里来 */
-		 	
+				if(BMS_HELI == BackCOMM->agreetype)	
+				{
+					ClearGunFallingEdge();     //清除拔枪下降沿。停止后必须拔枪才能再次开启充电
+				}
 				DebugInfoByCon("STEP_CHGEND，充电结束");
 		      /* 关模块 */
 		     u8Msg[0] = ptrCtrl->gunNo;

@@ -16,6 +16,7 @@
 #include <stdlib.h>
 #include "MeaureGunTemperature.h"
 #include "common.h"
+#include "TaskBackComm.h"
 
 #include "Adc_Calc.h"
 /**********************************************************************************
@@ -355,7 +356,7 @@ uint8 Check_CarVolt(uint8 gunNo)
 	int16 tmpVdc2 = Vdc3 * 0.95;
 	
 	/* 车辆端自己测的电压不应该是负值,最高符号位不应该是1 */
-	if ((pBms->bcp.batcurvolt & 0x8000) == 0x8000)
+	if(((pBms->bcp.batcurvolt & 0x8000) == 0x8000) || (Vdc3 < 0))
 	{
 		Check_SetErrCode(gunNo, ECODE104_PAVOUTSIDEREVERSE);   //枪外侧电压反接(BMS端)			 
 		return CHECK_FALSE;
@@ -376,7 +377,8 @@ uint8 Check_CarVolt(uint8 gunNo)
 /*检测接触器内侧电压是否在接触器外侧电压 10V以内*/
 uint8 Check_KmInAndOut(uint8 gunNo)
 {
-	uint16 Vdc1,Vdc3;
+	int16 Vdc1,Vdc3;
+	PARAM_COMM_TYPE *BackCOMM = ChgData_GetCommParaPtr();
 //	Vdc1 =  ((CHARGE_TYPE *)ChgData_GetRunDataPtr(gunNo))->iso->vdc3;
     Vdc1 = AdcCalc_GetValue()->vdciso[1];
 	//uint16 Vdc3 = ((CHARGE_TYPE *)ChgData_GetRunDataPtr())->iso->vdc3;
@@ -384,11 +386,21 @@ uint8 Check_KmInAndOut(uint8 gunNo)
 #ifdef BMSTEST	
 	Vdc1 = Vdc3; /*for test*/
 #endif	
+	if(BMS_HELI == BackCOMM->agreetype)	
+	{
+		DebugInfoByChk("检测接触器内侧电压是否在接触器外侧电压 20V以内");
 
-	DebugInfoByChk("检测接触器内侧电压是否在接触器外侧电压 10V以内");
+		if( abs( Vdc1 - Vdc3 ) < VOLT_TRAN(30) ) {
+				return CHECK_TRUE;
+		}		
+	}
+	else
+	{
+		DebugInfoByChk("检测接触器内侧电压是否在接触器外侧电压 10V以内");
 
-	if( abs( Vdc1 - Vdc3 ) < VOLT_TRAN(10) ) {
-		  return CHECK_TRUE;
+		if( abs( Vdc1 - Vdc3 ) < VOLT_TRAN(10) ) {
+				return CHECK_TRUE;
+		}		
 	}
 	return CHECK_FALSE;
 }
@@ -396,7 +408,7 @@ uint8 Check_KmInAndOut(uint8 gunNo)
 uint8 Check_BcpToModSetVolt(uint8 gunNo)
 {
 //	 uint16 Vdc3 = ((CHARGE_TYPE *)ChgData_GetRunDataPtr(gunNo))->iso->vdc3;
-   uint16 Vdc3 = AdcCalc_GetValue()->vdciso[1];
+   int16 Vdc3 = AdcCalc_GetValue()->vdciso[1];
    BMSDATA_ST *pBms = Bms_GetBmsCarDataPtr(gunNo);
 	
 	  if( ( pBms->bcl.needvolt <= pBms->bcp.chgmaxvolt ) && ( Vdc3 < pBms->bcp.chgmaxvolt ) ) {
