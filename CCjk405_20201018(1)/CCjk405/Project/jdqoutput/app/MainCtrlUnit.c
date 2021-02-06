@@ -1457,7 +1457,7 @@ void ChargeCtrlStep(CTRL_STEP *ptrCtrl,PROTO_ST *proto)
 			if(BMS_HELI == BackCOMM->agreetype)
 			{
 				u16TmpCnt = 0;
-		   		Delay10Ms(1);
+		   		Delay10Ms(300);   //加延时，等待电池端吸合继电器
 
 			 	do 
 			 	{
