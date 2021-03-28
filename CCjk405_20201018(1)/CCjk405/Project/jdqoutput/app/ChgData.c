@@ -10,6 +10,7 @@
 #include "TaskMainCtrl.h"
 #include "ChgData.h"
 #include "Screen.h"
+#include "TaskBackComm.h"
 #include <string.h>
 
 //#define DEF_MAX_GUN_NO   2
@@ -190,6 +191,8 @@ static uint16 SingleModnumVol_system_test = 100;
 
 uint8 ChgData_InitDefaultOperPara(void)
 {
+		PARAM_COMM_TYPE *BackCOMM = ChgData_GetCommParaPtr();
+	
 		gRunParam.maxvolt = MODULE_MAXVOL;//VOLT_TRAN(750);     /*0.1*/
 	  gRunParam.minvolt = MODULE_MINVOL;//VOLT_TRAN(200);
 	  gRunParam.maxcurr = CURR_10TRAN(MaxCurr_system_test);

@@ -388,7 +388,7 @@ uint8 Check_KmInAndOut(uint8 gunNo)
 #endif	
 	if(BMS_HELI == BackCOMM->agreetype)	
 	{
-		DebugInfoByChk("检测接触器内侧电压是否在接触器外侧电压 20V以内");
+		DebugInfoByChk("检测接触器内侧电压是否在接触器外侧电压 30V以内");
 
 		if( abs( Vdc1 - Vdc3 ) < VOLT_TRAN(30) ) {
 				return CHECK_TRUE;

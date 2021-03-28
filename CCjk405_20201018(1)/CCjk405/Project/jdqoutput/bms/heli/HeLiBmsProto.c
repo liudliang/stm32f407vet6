@@ -95,7 +95,7 @@ static void DetermineGunFallingEdge(void)
 	
 static void heli_check_bms_timeout(void)
 {	
-	if((TskMain_GetWorkStep(AGUN_NO) == STEP_BRO_SUB) || (TskMain_GetWorkStep(AGUN_NO) == STEP_ADJUST_SUB))
+	if(TskMain_GetWorkStep(AGUN_NO) == STEP_ADJUST_SUB)
 	{
 	  if(GetSystemTick() - Bms_GetStartTimeCount(0,BCL_TM) > SECS2TICKS(ChgData_GetRunParamPtr()->bcltm) ) {
 			Check_SetErrCode(0,ECODE7_BCLTM);

@@ -1464,7 +1464,7 @@ void ChargeCtrlStep(CTRL_STEP *ptrCtrl,PROTO_ST *proto)
 //					tmp16 = ((CHARGE_TYPE *)ChgData_GetRunDataPtr())->meter->volt;    //直流电压(外侧)
 					tmp16 = Bms_GetBmsCarDataPtr(0)->bcp.batcurvolt;     //因绝缘检测检测的不准，暂时的替代方法
 					
-				  	if (u16TmpCnt++ > 1000)   //20S
+				  	if (u16TmpCnt++ > 1750)   //35S
 					{
 						u16TmpCnt = 0;
 						Check_SetErrCode(0,ECODE7_BCLTM);
