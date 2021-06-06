@@ -269,7 +269,7 @@ const STR_ERR_ST conErrStr[]=
 	{ECODE86_CHGLKERR,        "充电连接器故障"},
 	{ECODE87_CHGINTMPERR,     "充电机内部过温故障"},
 	{ECODE88_CHGENERGY,       "电量不能传送"},
-	{ECODE89_CHGJTST,         "急停故障,请向右旋扭急停按钮恢复"},
+	{ECODE89_CHGJTST,         "手动停止,请再按一次复位"},//"急停故障,请向右旋扭急停按钮恢复"},
   {ECODE90_CHGOTHER,        "其它故障"},
 	{ECODE91_CHGCURRERR,      "充电电流不匹配"},    
 	{ECODE92_CHGVOLTERR,      "充电机电压异常"},

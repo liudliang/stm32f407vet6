@@ -199,7 +199,7 @@
 
 #ifdef AUNICE_DEBUG
 #define MAIN_VERSION	3
-#define SUB_VERSION	    4
+#define SUB_VERSION	    5
 
 #define U_MAIN_VERSION	0
 #define U_SUB_VERSION	1
