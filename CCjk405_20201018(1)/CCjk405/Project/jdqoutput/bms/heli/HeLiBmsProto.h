@@ -48,6 +48,7 @@ void heli_bms_send_data(_t_heli_send_data_info *sendinf, uint8 *pbuf, uint16 len
 SEND_PROTO_ST *heli_get_proto_list(void);
 void heli_polling(void);
 uint8 heli_bms_send_ccs(uint8 *buf,void* st,uint8 gunnum);
+void Heli_delay_off_fan_flag_set(void);
 #endif
 
 

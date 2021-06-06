@@ -29,7 +29,17 @@ const RCV_PROTO_ST g_heli_RcvProtoList[] = \
 };
 #endif
 
+//延时关风扇标志（5分钟）
+static uint8 s_delay_off_fan_flag = 0;
+static uint32 s_delay_off_fan_ticks = 0;
 
+
+
+void Heli_delay_off_fan_flag_set(void)
+{
+	s_delay_off_fan_flag = 1;
+	s_delay_off_fan_ticks = GetSystemTick();
+}
 
 
 SEND_PROTO_ST g_heli_ChgProtoList[] = \
@@ -112,7 +122,7 @@ static 	uint8 errBuf[MAX_ERRBUF_SIZE] = { 0 },Reason = 0;
 //此函数放在周期1500ms的循环中。合力协议要求插枪就能充电
 void heli_polling(void)
 {
-	static uint8 cnt = 0;
+	static uint8 cnt = 0,s_chargflag = 0;
 	DEV_INPUT_TYPE *pInputDataptr = Check_GetInputDataptr(AGUN_NO);
 	
 	if (TskMain_GetWorkStep(AGUN_NO) == STEP_IDEL)
@@ -156,6 +166,25 @@ void heli_polling(void)
 //	Delay10Ms(150);
 	
 	heli_check_bms_timeout();
+	
+//-----------------风扇处理	
+	if(1 == s_delay_off_fan_flag)
+	{
+		if(GetSystemTick() > (s_delay_off_fan_ticks+5*60*TIM_1S))
+		{
+			s_delay_off_fan_flag = 0;
+		}
+	}
+	if((STEP_WAITOVER == TskMain_GetWorkStep(0)) || (STEP_WAIT_SUB == TskMain_GetWorkStep(0)) || (STEP_IDEL == TskMain_GetWorkStep(0)))
+	{
+		if(0 == s_delay_off_fan_flag)
+		{
+			RelayOut_AcKmOut(JOUT_OFF);
+		}
+	}
+//-----------------
+
+	
 }
 
 //清除拔枪下降沿

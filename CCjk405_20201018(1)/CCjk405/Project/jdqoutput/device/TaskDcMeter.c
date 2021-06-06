@@ -19,6 +19,7 @@
 #include "TaskAcMeter.h"
 #include "TaskBackComm.h"
 #include "HeLiBmsProto.h"
+#include "Gpio.h"
 
 #ifdef DC_MET_ON
 
@@ -263,11 +264,43 @@ static void CheckMeterDataErr(uint8 gunNo)
 }
 
 
+//灯初始化状态
+void led_init(void)
+{
+	LEDOFF(LED4);    //red
+	LEDOn(LED5);     //green   
+	LEDOFF(LED6);	   //yellow
+}
+
+////上电 - 绿色; 充电中 – 黄色; 故障 – 红色
+////高电平点亮灯,低电平熄灭灯.
+//void led_show(void)
+//{
+//	static uint8 s_agun_work_step = STEP_IDEL;
+//	
+//	if(s_agun_work_step != GetWorkStep(AGUN_NO))
+//	{
+//		s_agun_work_step = GetWorkStep(AGUN_NO);
+//		if(STEP_CHARGEING == GetWorkStep(AGUN_NO))
+//		{
+//			LEDOn(LED5);
+//		}
+//		else
+//		{
+//			LEDOFF(LED5);
+//		}
+//	}
+
+//	
+//}
+
+
 void TskDcAc_InitData(void)
 {
 	 memset(&gMeterData,0,sizeof(DEV_METER_TYPE));
 	 memset(TskAc_GetMeterDataPtr(AGUN_NO),0,sizeof(DEV_ACMETER_TYPE));
 //	 TskAc_InitData();
+	led_init();
 }
 
 #define MET_ERR_TIMES 200
@@ -500,7 +533,7 @@ if( ReadAcMeterData() > 0) {
 		cyclecnt = 0;
 		heli_polling();
 	}
-
+	
 		Delay10Ms(APP_TASK_DCMETER_DELAY);
 
 

@@ -40,6 +40,9 @@ typedef enum
   LED1 = 0,
   LED2,
   LED3,
+  LED4,
+  LED5,
+  LED6,	
 	LED_MAX,
 }Led_TypeDef;
 
@@ -55,6 +58,19 @@ typedef enum
 #define LED3_GPIO_PORT              GPIOG                        /* BMS2_RUN */
 #define LED3_GPIO_CLK               RCC_AHB1Periph_GPIOG  
 #define LED3_GPIO_PIN               GPIO_Pin_2
+
+
+#define LED4_GPIO_PORT              GPIOB                        /* red-fault */ 
+#define LED4_GPIO_CLK               RCC_AHB1Periph_GPIOB 
+#define LED4_GPIO_PIN               GPIO_Pin_3
+  
+#define LED5_GPIO_PORT              GPIOB                        /* green-power on */ 
+#define LED5_GPIO_CLK               RCC_AHB1Periph_GPIOB  
+#define LED5_GPIO_PIN               GPIO_Pin_4
+  
+#define LED6_GPIO_PORT              GPIOB                        /* yellow-charging */ 
+#define LED6_GPIO_CLK               RCC_AHB1Periph_GPIOB  
+#define LED6_GPIO_PIN               GPIO_Pin_5
 
 /* 0急停状态 */
 /* 1交流输入断路器状态 */
@@ -285,17 +301,17 @@ typedef enum
 #define JOUTPUT8_GPIO_CLK           RCC_AHB1Periph_GPIOE 
 #define JOUTPUT8_GPIO_PIN           GPIO_Pin_7           
 
-#define JOUTPUT9_GPIO_PORT			    GPIOE                   /* A枪故障指示灯 */                
-#define JOUTPUT9_GPIO_CLK           RCC_AHB1Periph_GPIOE 
-#define JOUTPUT9_GPIO_PIN           GPIO_Pin_6 
+#define JOUTPUT9_GPIO_PORT			    GPIOB //GPIOE                   /* A枪故障指示灯 */                
+#define JOUTPUT9_GPIO_CLK           RCC_AHB1Periph_GPIOB//RCC_AHB1Periph_GPIOE 
+#define JOUTPUT9_GPIO_PIN           GPIO_Pin_3//GPIO_Pin_6 
 
 #define JOUTPUT10_GPIO_PORT			    GPIOE                   /* B枪充电指示灯 */                
 #define JOUTPUT10_GPIO_CLK          RCC_AHB1Periph_GPIOE 
 #define JOUTPUT10_GPIO_PIN          GPIO_Pin_5           
 
-#define JOUTPUT11_GPIO_PORT			    GPIOE                   /* A枪充电指示灯 */                
-#define JOUTPUT11_GPIO_CLK          RCC_AHB1Periph_GPIOE 
-#define JOUTPUT11_GPIO_PIN          GPIO_Pin_4
+#define JOUTPUT11_GPIO_PORT			    GPIOB //GPIOE                   /* A枪充电指示灯 */                
+#define JOUTPUT11_GPIO_CLK          RCC_AHB1Periph_GPIOB//RCC_AHB1Periph_GPIOE 
+#define JOUTPUT11_GPIO_PIN          GPIO_Pin_5
 
 #define JOUTPUT12_GPIO_PORT			    GPIOG                   /* BMS1辅助电源电压选择(常闭12V，常开24V) */                
 #define JOUTPUT12_GPIO_CLK          RCC_AHB1Periph_GPIOG 

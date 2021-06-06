@@ -912,7 +912,10 @@ void DevEnterIdleStatus(CTRL_STEP* gun_ctrl)
 	if( GetSystemTick() - gun_ctrl->u32IdleTicks > TIM_10S ) {
 		gun_ctrl->u32IdleTicks = GetSystemTick();
 		if( ptrOtherlogic->workstep == STEP_IDEL ) {
-			RelayOut_AcKmOut(JOUT_OFF);
+			if(BMS_HELI != ChgData_GetCommParaPtr()->agreetype)	
+			{			
+				RelayOut_AcKmOut(JOUT_OFF);
+			}
 		}	
 	}
 
@@ -1721,6 +1724,10 @@ void ChargeCtrlStep(CTRL_STEP *ptrCtrl,PROTO_ST *proto)
 				if(BMS_HELI == BackCOMM->agreetype)	
 				{
 					ClearGunFallingEdge();     //清除拔枪下降沿。停止后必须拔枪才能再次开启充电
+					if(gPtrRunData[ptrCtrl->gunNo]->bill->chgsecs > 60)
+					{
+						Heli_delay_off_fan_flag_set();
+					}
 				}
 				DebugInfoByCon("STEP_CHGEND，充电结束");
 		      /* 关模块 */
@@ -1856,7 +1863,10 @@ void ChargeCtrlStep(CTRL_STEP *ptrCtrl,PROTO_ST *proto)
 				
 //				if( ptrOtherlogic->workstep == STEP_IDEL ) {
 //					 Delay10Ms(200);
-				RelayOut_AcKmOut(JOUT_OFF);
+				if(BMS_HELI != BackCOMM->agreetype)	
+				{
+					RelayOut_AcKmOut(JOUT_OFF);
+				}
 //				}					
 				Delay10Ms(100);
 				
