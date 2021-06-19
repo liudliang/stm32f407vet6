@@ -199,7 +199,7 @@
 
 #ifdef AUNICE_DEBUG
 #define MAIN_VERSION	3
-#define SUB_VERSION	    5
+#define SUB_VERSION	    7
 
 #define U_MAIN_VERSION	0
 #define U_SUB_VERSION	1
@@ -229,6 +229,14 @@
 
 #define DCMETER_TYPE                DCMETER_RECT
 
+
+
+/****************************屏幕相关**********************************************/	
+
+#define DWIN_DGUS         0       //迪文dgus一代屏
+#define DWIN_DGUS_II      1       //迪文dgus二代屏
+
+#define SCREEN_TYPE                DWIN_DGUS_II
 
 #endif
 

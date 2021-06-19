@@ -68,6 +68,7 @@ typedef struct
 #define  VAR2    (sGlocalPara.rcv.charge.setmoney)
 #define  VAR3    (sGlocalPara.rcv.charge.settime)
 #define  VAR4    (sGlocalPara.rcv.CardPinCode[0])
+#define  VAR5    (sGlocalPara.rcv.systime[0])
 
 
 uint8 gUploadBuf[64] = {0};
@@ -79,6 +80,7 @@ const UploadOper_t conUploadVar[] = {
 //		{0x0003,INNER_REG,10,0,(uint16 *)gUploadBuf,Page_RegPictureNo},    					/*获取图片号*/
 		{0x0006,INNER_REG,10,0,(uint16 *)gUploadBuf,Page_RegIStouch},      						/*获取是否有触摸*/
 		{DGUS_PW_CARD_ADR,PASSWD_VAR,10,NONE_DOT,(uint16 *)&VAR4,Page_KeyPwparam},  	/*输入密码*/ 
+		{DGUS_SYS_TIME_ADR,STRING_VAR,16,NONE_DOT,(uint16 *)&VAR5,NULL},  	          /*设置系统时间*/ 		
 
 	{INVALID_REG_ADR,0x0000,E_PICTUREANY,NULL,NULL},   /*无效*/
 };
@@ -518,9 +520,10 @@ uint8 Screen_ChangePassWord(uint8 *obj,uint16 *src,uint16 len)
 *************************************************************************/
 void Screen_UploadVarDeal(uint16 adr,uint16 regNum,uint16 *data)
 {
-	uint16 i;
+	uint16 i,srcadd;
 	uint8 *ptr = (uint8 *)data;
 	const UploadOper_t *varitem = Screen_GetUpLoadVarItem(adr);
+	
 	if( NULL == varitem ) {
 		return;
 	}
@@ -539,13 +542,28 @@ void Screen_UploadVarDeal(uint16 adr,uint16 regNum,uint16 *data)
 		}
 		case STRING_VAR:
 		{
-			 for( i = 0; i < regNum*2;i++ ) {
-				 if(ptr[i] == 0xff ) {
-					 ptr[i] = 0;
-					 break;
-				 }
+       if((DWIN_DGUS_II == SCREEN_TYPE) && (DGUS_PW_SHOW_ADR == adr))
+			 {
+				 for( i = 0; i < regNum*2;i++ ) {
+					 if(ptr[i] == 0xff ) {
+						 ptr[i] = 0;
+						 break;
+					 }
+				 }		
+				 memcpy(varitem->var,&ptr[2],(regNum-2)*2);				 
+			 }	
+			 else
+			 {
+				 for( i = 0; i < regNum*2;i++ ) {
+					 if(ptr[i] == 0xff ) {
+						 ptr[i] = 0;
+						 break;
+					 }
+				 }	
+				 memcpy(varitem->var,data,regNum*2);				 
 			 }
-			 memcpy(varitem->var,data,regNum*2);
+
+			 
 		}
 		break;
 		case TIME_VAR:
@@ -818,7 +836,11 @@ uint8 Screen_SetTimeToBoardOnKey(void)
 int32 Screen_UartWrite(uint8 *buf,	int32 size)
 {
 	#if 1
-	return Uart_Write(gPtrUartHandle,buf,size);
+	if(SCREEN_TYPE == DWIN_DGUS_II)
+	{
+		Delay10Ms(5);
+	}		
+	return Uart_Write(gPtrUartHandle,buf,size);	
 	#else
 	return 0;
 	#endif
@@ -854,7 +876,7 @@ void Screen_ComInit(void)
   gPtrUartHandle = UartHandler[SCREEN_COM]; 
 	
 	/* 波特率 */
- 	tmp  = 115200;
+ 	tmp  = 38400;//115200;
 	Uart_IOCtrl(UartHandler[SCREEN_COM], SIO_BAUD_SET, &tmp);	
 
 	/* 无校验 */
@@ -1387,6 +1409,7 @@ uint8 Screen_OpenAccountCardDeal(uint8 gunNo)
 			memset(text,0,sizeof(text));
 			/*显示原因*/
 			tmp = FeeDataPtr->bill.endreason % REASOM_MUN;
+			Screen_ShowMessage("                         ",conActAddr[gunNo][3]);  //清除文本变量
 			if(EERR_REASON == tmp)
 			{
 				const STR_ERR_ST *errstr;
@@ -1413,7 +1436,7 @@ uint8 Screen_OpenAccountCardDeal(uint8 gunNo)
 		
 			/*显示充电时长*/
 			sprintf((char *)text,"%d",FeeDataPtr->bill.chgsecs/60);
-			strcat((char *)text,"分钟");
+			strcat((char *)text,"分钟    ");
 			Hmi_ShowText(conActAddr[gunNo][6],strlen((char *)text),text);
 			memset(text,0,sizeof(text));
 			
@@ -1424,7 +1447,7 @@ uint8 Screen_OpenAccountCardDeal(uint8 gunNo)
 			
 			/*显式结束SOC*/
 			sprintf((char *)text,"%d",FeeDataPtr->bill.soc);
-			strcat((char *)text,"%");
+			strcat((char *)text,"%    ");
 			Hmi_ShowText(conActAddr[gunNo][8],strlen((char *)text),text);
 			memset(text,0,sizeof(text));
 		}
@@ -1938,6 +1961,7 @@ void Screen_MessageDeal(void)
 //							 {
 									errstr = Screen_GetErrSting(msg.MsgData[3]);
 //							 }
+							 Screen_ShowMessage((char *)"               ",MsgWkstatuAdr[gunNo][2]);
 							 Screen_ShowMessage(errstr->str,MsgWkstatuAdr[gunNo][3]);
 							 strcpy(temp,"请拨打服务电话：");
 							 strcat(temp,(char *)chgparaPtr->telephone);		
@@ -2493,6 +2517,9 @@ void Screen_ShowCyclic()
 		 	currfeeshow();   /*费率版本号显示*/  
 	    switch(PageNo)
 		  {
+				case E_PICTURE0: 
+					Screen_SetChgFlag(0);
+					break;
 				case E_PICTURE1:  //交流接触器断开时，触摸屏偶尔重启
 					IDEL_ShowGunState(BGUN_NO);
 				case E_PICTURE47:	
@@ -2659,7 +2686,7 @@ void Task_Screen_Main(void *p_arg)
 	
 	while(1) {
 		
-		TaskRunTimePrint("Task_Screen_Main begin", OSPrioCur);
+//		TaskRunTimePrint("Task_Screen_Main begin", OSPrioCur);
 
 #if 1
 		/*接收触摸屏数据处理*/
@@ -2685,7 +2712,7 @@ void Task_Screen_Main(void *p_arg)
 
 #endif
 
-		TaskRunTimePrint("Task_Screen_Main end", OSPrioCur);
+//		TaskRunTimePrint("Task_Screen_Main end", OSPrioCur);
 
 		Delay10Ms(APP_TASK_SCREEN_DELAY);  //patli 20200106 Delay5Ms(2); 不能太快和太慢，太慢导致消息接收不完全
 			

@@ -18,6 +18,8 @@
 #define DGUS_PASSWORD_ADR    0x1290   /*密码地址*/
 #define DGUS_ID_ADR          0x12B0   /*本桩ID*/
 
+#define DGUS_SYSTIME_ADR          0x12C0   /*系统时间*/
+
 /*数据变量*/
 #define DGUS_REMOTEPORT_ADR  0x1210   /*端口号地址*/
 #define DGUS_DHCPEN_ADR      0x1260   /*DHCP使能*/
@@ -219,6 +221,8 @@ extern void Page_KeyPwparam(void);
 extern void Page_UploadPassWd(void);
 /*获取是否有触摸*/
 extern void Page_RegIStouch(void);
+/*获取设置系统的时间*/
+extern uint8_t Page_KeySetSystime(void);
 
 /*参数信息写*/
 extern uint8 Page_ParaWrite1(uint8 *ndata);

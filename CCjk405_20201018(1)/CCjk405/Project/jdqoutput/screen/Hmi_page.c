@@ -908,8 +908,9 @@ void Page_Sysreturn()
 	if(E_SAFE1 == sGlocalPara.Sysflag )
 	{
 	    sGlocalPara.Sysflag = E_SAFE3;
-		  sGlocalPara.setparafg = 0;
 	}
+	sGlocalPara.setparafg = 0;
+
 }
 
 
@@ -1242,7 +1243,7 @@ uint8 Page_ParaWrite1(uint8 *ndata)
 					char *text = "数据参数保存失败";
 					Screen_ShowMessage(text,DGUS_SETPA_PROADR);
 					Delay10Ms(150);
-					Screen_ShowMessage(" ",DGUS_SETPA_PROADR);
+					Screen_ShowMessage("               ",DGUS_SETPA_PROADR);
 					return FALSE;
 			}
 		}		
@@ -1279,7 +1280,7 @@ uint8 Page_ParaWrite1(uint8 *ndata)
 			 char *text = "网络参数保存失败";
 	     Screen_ShowMessage(text,DGUS_SETPA_PROADR);
 	     Delay10Ms(150);
-	     Screen_ShowMessage(" ",DGUS_SETPA_PROADR);
+	     Screen_ShowMessage("               ",DGUS_SETPA_PROADR);
 		   return FALSE;
 		}
 //				SAVE_ALL_TYPE
@@ -1316,7 +1317,7 @@ uint8 Page_ParaWrite2(uint8 *ndata)
 				char *text = "参数保存失败";
 				Screen_ShowMessage(text,DGUS_SETSENPA_PROADR);
 				Delay10Ms(150);
-				Screen_ShowMessage(" ",DGUS_SETSENPA_PROADR);
+				Screen_ShowMessage("             ",DGUS_SETSENPA_PROADR);
 				return FALSE;
 			}
 			
@@ -1383,7 +1384,7 @@ uint8 Page_ParaWrite2(uint8 *ndata)
 				char *text = "参数保存失败";
 				Screen_ShowMessage(text,DGUS_SETSENPA_PROADR);
 				Delay10Ms(150);
-				Screen_ShowMessage(" ",DGUS_SETSENPA_PROADR);
+				Screen_ShowMessage("             ",DGUS_SETSENPA_PROADR);
 				return FALSE;
 			}
 		 
@@ -1453,7 +1454,7 @@ uint8 Page_ParaWrite2(uint8 *ndata)
 			 char *text = "参数保存失败";
 			 Screen_ShowMessage(text,DGUS_SETSENPA_PROADR);
 			 Delay10Ms(150);
-			 Screen_ShowMessage(" ",DGUS_SETSENPA_PROADR);
+			 Screen_ShowMessage("             ",DGUS_SETSENPA_PROADR);
 			 return FALSE;
 		}
 		ptr = (uint16 *)&buf[7];	
@@ -1535,7 +1536,7 @@ uint8 Page_ParaWrite2(uint8 *ndata)
 			}			
 	  }	
 		Delay10Ms(100);
-		Screen_ShowMessage(" ",DGUS_SETSENPA_PROADR);
+		Screen_ShowMessage("             ",DGUS_SETSENPA_PROADR);
 		
 		return TRUE;
 }
@@ -1583,7 +1584,7 @@ uint8 Page_ParaRead1()
 		char *text = "参数读取成功！";
 		Screen_ShowMessage(text,DGUS_SETPA_PROADR);
 		Delay10Ms(100);
-		Screen_ShowMessage(" ",DGUS_SETPA_PROADR);
+		Screen_ShowMessage("               ",DGUS_SETPA_PROADR);
 	
 		return 0;
 }
@@ -1746,7 +1747,7 @@ uint8 Page_ParaRead2()
 	  char *text = "参数读取成功！";
 	  Screen_ShowMessage(text,DGUS_SETSENPA_PROADR);		
 	  Delay10Ms(100);
-	  Screen_ShowMessage(" ",DGUS_SETSENPA_PROADR);
+	  Screen_ShowMessage("             ",DGUS_SETSENPA_PROADR);
 		
     return 0;		
  }
@@ -1784,11 +1785,27 @@ void Page_KeySystem1Return()
 extern uint8 Screen_SetTimeToBoardOnKey(void);
 void Page_KeySetTime()
 {
-	  Screen_SetTimeToBoardOnKey();
-	  char *str = "日期时间校验成功！";
-	  Screen_ShowMessage(str,DGUS_SETPA_PROADR);
+		char *str = "日期时间校验成功！";
+	  char *str1 = "日期时间校验失败！";
+	
+    if(SCREEN_TYPE == DWIN_DGUS_II)
+		{
+			if(FALSE == Page_KeySetSystime())
+			{
+				Screen_ShowMessage(str1,DGUS_SETPA_PROADR);
+			}
+			else
+			{
+				Screen_ShowMessage(str,DGUS_SETPA_PROADR);
+			}
+		}	
+		else
+		{
+			Screen_SetTimeToBoardOnKey();
+			Screen_ShowMessage(str,DGUS_SETPA_PROADR);
+		}
 	  Delay10Ms(200);
-	  Screen_ShowMessage(" ",DGUS_SETPA_PROADR);
+	  Screen_ShowMessage("               ",DGUS_SETPA_PROADR);
 }
 
 /*系统重启*/
@@ -1833,7 +1850,7 @@ void Page_KeyClear()
 	char *text = "记录擦除成功！";
 	Screen_ShowMessage(text,DGUS_SETSENPA_PROADR);
 	Delay10Ms(100);
-	Screen_ShowMessage(" ",DGUS_SETSENPA_PROADR);
+	Screen_ShowMessage("             ",DGUS_SETSENPA_PROADR);
 
 }
 //	uint8 startH;
@@ -2155,8 +2172,8 @@ void Page_KeyPassWdEnter()
 		 {
 				Screen_ShowMessage((char *)"密码输入错误",DGUS_PASSWD_PROADR);
 				Delay10Ms(200);
-				Screen_ShowMessage((char *)"      ",DGUS_PASSWD_PROADR);
-			  Screen_ShowMessage((char *)" ",DGUS_STARTMODE_CHARGAPSWSHOW);
+				Screen_ShowMessage((char *)"            ",DGUS_PASSWD_PROADR);
+			  Screen_ShowMessage((char *)"         ",DGUS_STARTMODE_CHARGAPSWSHOW);
 		 }
    		 
 }
@@ -2174,6 +2191,29 @@ void Page_UploadPassWd()
 	 Screen_ShowMessage((char *)"  ******",DGUA_PWSH_ADR);
 
 }
+
+
+
+//----------------------------设置时间  dgusii开发时直接存储的ASCII数据***
+uint8_t Page_KeySetSystime(void)
+{
+	struct tm systime;
+	
+	if(0 == SC_VAR.systime[0])
+	{
+		return FALSE;
+	}
+	
+	systime.tm_year = (SC_VAR.systime[0]-'0')*1000 + (SC_VAR.systime[1]-'0')*100 + (SC_VAR.systime[2]-'0')*10 + (SC_VAR.systime[3]-'0');
+	systime.tm_mon  = (SC_VAR.systime[4]-'0')*10 + (SC_VAR.systime[5]-'0');
+	systime.tm_mday = (SC_VAR.systime[6]-'0')*10 + (SC_VAR.systime[7]-'0');
+	systime.tm_hour = (SC_VAR.systime[8]-'0')*10 + (SC_VAR.systime[9]-'0');
+	systime.tm_min  = (SC_VAR.systime[10]-'0')*10 + (SC_VAR.systime[11]-'0');
+	systime.tm_sec  = (SC_VAR.systime[12]-'0')*10 + (SC_VAR.systime[13]-'0');
+	RTC_SetDateTime(systime);		
+	return TRUE;
+}
+//----------------------------
 
 
 
@@ -2492,18 +2532,25 @@ void Page_KeyModeDetail()
 
 void Pagez_NetParaShow()
 {
-
-  char str[20] = {0};
+	struct tm gScreenSystime = Time_GetSystemCalendarTime();
+  char str[25] = {0};
   
 	 PARAM_DEV_TYPE *chgparaPtr = ChgData_GetDevParamPtr();
 	 PARAM_COMM_TYPE *Eth = ChgData_GetCommParaPtr();
 	
 	 /*充电桩ID显示*/
 	 Hmi_ClearReg(DGUS_ID_ADR,1); 
-   memcpy(str,chgparaPtr->chargeId,sizeof(chgparaPtr->chargeId));
-	 str[sizeof(chgparaPtr->chargeId)] = 0;  //结束符
+   sprintf(str,"20%d.%d.%d.%d",Eth->netpara.RemoteIpAddr[0],Eth->netpara.RemoteIpAddr[1],\
+	 Eth->netpara.RemoteIpAddr[2],Eth->netpara.RemoteIpAddr[3]);
    Screen_ShowMessage((char *)str,DGUS_ID_ADR);
 
+	
+	 /*系统时间方式*/
+	 Hmi_ClearReg(DGUS_SYSTIME_ADR,1);
+	 sprintf(str, "%.4d%.2d%.2d%.2d%.2d%.2d\r\n", gScreenSystime.tm_year,gScreenSystime.tm_mon,gScreenSystime.tm_mday,
+	 gScreenSystime.tm_hour,gScreenSystime.tm_min,gScreenSystime.tm_sec);	
+   Screen_ShowMessage((char *)str,DGUS_SYSTIME_ADR);
+	
 	
 	  /*远程IP显示*/
    Hmi_ClearReg(DGUS_REMOTEIP_ADR,1);
@@ -2559,7 +2606,8 @@ void Pagez_NetParaShow()
 	 /*联网方式*/
 	 Hmi_ClearReg(DGUS_NETWAY_ADR,1);
    Hmi_WriteOneVar(DGUS_NETWAY_ADR,Eth->conntype);
- 
+	 
+
 }
 
 
@@ -2694,7 +2742,7 @@ uint8 Page_NetParaSetToBoard()
 	 char *text = "参数设置成功！";
 	 Screen_ShowMessage(text,DGUS_SETPA_PROADR);
 	 Delay10Ms(200);
-	 Screen_ShowMessage(" ",DGUS_SETPA_PROADR);
+	 Screen_ShowMessage("               ",DGUS_SETPA_PROADR);
 		
 		return TRUE;
 }
@@ -2870,7 +2918,7 @@ void Page_ParaRead3()
 		char *text = "参数读取成功！";
 		Screen_ShowMessage(text,DGUS_SETSENPA_PROADR);
 		Delay10Ms(100);
-		Screen_ShowMessage(" ",DGUS_SETSENPA_PROADR);	
+		Screen_ShowMessage("             ",DGUS_SETSENPA_PROADR);	
 }
 
 /*高级设置2 写*/
@@ -2965,7 +3013,7 @@ uint8 Page_ParaWrite3(uint8 *ndata)
 
 		Screen_ShowMessage(text,DGUS_SETSENPA_PROADR);
 		Delay10Ms(200);
-		Screen_ShowMessage(" ",DGUS_SETSENPA_PROADR);
+		Screen_ShowMessage("             ",DGUS_SETSENPA_PROADR);
 
 		return TRUE;
 	
@@ -3001,9 +3049,9 @@ void Page_KeyPwCardEnter()
 void Page_KeyPwCardReturn()
 {
    Hmi_ChangePicture(gScrenCtrlPara.u8keepPic); 
-	 Screen_ShowMessage((char *)" ",DGUS_PASSWD_PROADR);
+	 Screen_ShowMessage((char *)"           ",DGUS_PASSWD_PROADR);
 	 memset(SC_VAR.PinCode,0,sizeof(SC_VAR.CardPinCode));
-	 Screen_ShowMessage((char *)" ",DGUS_PW_CARDSH_ADR);
+	 Screen_ShowMessage((char *)"         ",DGUS_PW_CARDSH_ADR);
 }
 
 extern DEV_RELAY_TYPE * Relay_GetRelayDataPtr(uint8 no);
@@ -3251,7 +3299,7 @@ void Page_KeyChargPwdEnter()
 		 Delay10Ms(200);
 		 Hmi_ClearReg(DGUS_STARTMODE_CHARGAPSW,9);
 		 Hmi_ClearReg(DGUS_STARTMODE_CHARGAPSWSHOW,9);
-		 Screen_ShowMessage((char *)"       ",DGUS_PASSWD_PROADR);
+		 Screen_ShowMessage((char *)"         ",DGUS_PASSWD_PROADR);
 //		 Screen_ShowMessage((char *)"     ",DGUS_STARTMODE_CHARGAPSW);
 	}
 }

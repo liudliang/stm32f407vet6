@@ -43,6 +43,7 @@
 #define DGUS_TWODIMBARCODE_ADDR_B    0x1980   /*B枪二维码地址*/
 
 #define DGUS_DEVID_ADDR              0x12B0   /*充电桩id*/
+#define DGUS_SYS_TIME_ADR             0x12C0   /*系统时间*/
 
 #define DGUS_VERSION_ADR             0x1748    /*软件版本显示*/
 
@@ -262,6 +263,7 @@ typedef struct
 	 DEV_LOGIC_TYPE  charge;            /*充电参数*/
 	 uint8           PinCode[8];        /*密码*/  
 	 uint8           CardPinCode[8];
+	 uint8           systime[14];        /*系统时间 20 21 06 19 13 16 00*/ 
 }ScreenRcv_t;
 
 
